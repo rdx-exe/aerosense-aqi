@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# AQI Prediction for Kolkata, West Bengal, India
+# Central configuration — all paths resolved relative to project root at runtime
+# ─────────────────────────────────────────────────────────────────────────────
+
+project:
+  name: "AI-Based Air Quality Index Prediction and Analysis Using Machine Learning"
+  city: "Kolkata"
+  state: "West Bengal"
+  country: "India"
+  timezone: "Asia/Kolkata"
+  target_variable: "AQI"
+  forecast_horizon: "next_day"
+
+# ── Data acquisition ─────────────────────────────────────────────────────────
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  # OpenAQ API v2 — free, open-source, no API key required
+  source:
+    provider: "openaq"
+    api_base_url: "https://api.openaq.org/v2"
+    measurements_endpoint: "/measurements"
+    parameters: ["pm25", "pm10", "no2", "so2", "o3", "co"]
+    location: "IN-Kolkata"
+    # Aggregation: daily means are computed from hourly observations
+    aggregation: "daily_mean"
+  # Fallback: local CSV with columns date,pm25,pm10,no2,so2,o3,co,aqi
+  fallback_csv: "data/raw/kolkata_aqi_history.csv"
+
+# ── Preprocessing ────────────────────────────────────────────────────────────
+preprocessing:
+  min_completeness: 0.60   # drop rows with <60% of features present
+  forward_fill_limit: 2    # max consecutive NaNs to impute forward
+  clip_outliers_iqr: true
+  iqr_multiplier: 1.5
+
+# ── Feature engineering ──────────────────────────────────────────────────────
+features:
+  lags: [1, 2, 3, 7]       # AQI values from 1, 2, 3 and 7 days ago
+  rolling_windows: [3, 7, 14]
+  target: "aqi_next_day"
+
+# ── Model training ───────────────────────────────────────────────────────────
+training:
+  test_size: 0.20
+  validation_size: 0.10
+  random_state: 42
+  n_jobs: -1
+  cv_folds: 5
+  models:
+    - "random_forest"
+    - "gradient_boosting"
+    - "xgboost"
+    - "linear_regression"
+    - "svr"
+
+# ── Evaluation ───────────────────────────────────────────────────────────────
+evaluation:
+  metrics: ["mae", "rmse", "r2"]
+  primary_metric: "rmse"
+
+# ── Output locations ─────────────────────────────────────────────────────────
+models_dir: "models"
+visualizations_dir: "visualizations"
+streamlit_app_dir: "streamlit_app"

@@ -1,0 +1,167 @@
+{
+  "name": "aqi_forecasting",
+  "timestamp": "2026-11-05T13:27:56.490754",
+  "data_source": "kolkata_city_day.csv",
+  "forecast_horizon": "next_day",
+  "config": {
+    "project": {
+      "name": "AI-Based Air Quality Index Prediction and Analysis Using Machine Learning",
+      "city": "Kolkata",
+      "state": "West Bengal",
+      "country": "India",
+      "timezone": "Asia/Kolkata",
+      "target_variable": "AQI",
+      "forecast_horizon": "next_day"
+    },
+    "data": {
+      "raw_dir": "data/raw",
+      "processed_dir": "data/processed",
+      "source": {
+        "provider": "openaq",
+        "api_base_url": "https://api.openaq.org/v2",
+        "measurements_endpoint": "/measurements",
+        "parameters": [
+          "pm25",
+          "pm10",
+          "no2",
+          "so2",
+          "o3",
+          "co"
+        ],
+        "location": "IN-Kolkata",
+        "aggregation": "daily_mean"
+      },
+      "fallback_csv": "data/raw/kolkata_aqi_history.csv"
+    },
+    "preprocessing": {
+      "min_completeness": 0.6,
+      "forward_fill_limit": 2,
+      "clip_outliers_iqr": true,
+      "iqr_multiplier": 1.5
+    },
+    "features": {
+      "lags": [
+        1,
+        2,
+        3,
+        7
+      ],
+      "rolling_windows": [
+        3,
+        7,
+        14
+      ],
+      "target": "aqi_next_day"
+    },
+    "training": {
+      "test_size": 0.2,
+      "validation_size": 0.1,
+      "random_state": 42,
+      "n_jobs": -1,
+      "cv_folds": 5,
+      "models": [
+        "random_forest",
+        "gradient_boosting",
+        "xgboost",
+        "linear_regression",
+        "svr"
+      ]
+    },
+    "evaluation": {
+      "metrics": [
+        "mae",
+        "rmse",
+        "r2"
+      ],
+      "primary_metric": "rmse"
+    },
+    "models_dir": "models",
+    "visualizations_dir": "visualizations",
+    "streamlit_app_dir": "streamlit_app"
+  },
+  "models": {
+    "linear_regression": {
+      "model_name": "linear_regression",
+      "train_mae": 0.39473684210526017,
+      "train_rmse": 0.39473684210526017,
+      "train_r2": 0.997229916897507,
+      "val_mae": 6.1842105263157805,
+      "val_rmse": 6.1842105263157805,
+      "val_r2": NaN,
+      "hyperparameters": {},
+      "feature_importance": {}
+    },
+    "random_forest": {
+      "model_name": "random_forest",
+      "train_mae": 5.587500000000006,
+      "train_rmse": 5.88188426441732,
+      "train_r2": 0.38494999999999857,
+      "val_mae": 9.275000000000006,
+      "val_rmse": 9.275000000000006,
+      "val_r2": NaN,
+      "hyperparameters": {},
+      "feature_importance": {
+        "pm2.5": 0.0,
+        "pm10": 0.06060606060606061,
+        "no2": 0.10101010101010101,
+        "so2": 0.06060606060606061,
+        "co": 0.030303030303030304,
+        "o3": 0.030303030303030304,
+        "aqi": 0.04040404040404041,
+        "day_of_week": 0.0707070707070707,
+        "month": 0.0,
+        "aqi_lag1": 0.0,
+        "aqi_lag3": 0.0,
+        "aqi_lag7": 0.0707070707070707,
+        "aqi_lag14": 0.0707070707070707,
+        "aqi_roll3_mean": 0.04040404040404041,
+        "aqi_roll7_mean": 0.08080808080808081,
+        "aqi_roll7_std": 0.050505050505050504,
+        "pm2.5_lag1": 0.050505050505050504,
+        "pm10_lag1": 0.020202020202020204,
+        "no2_lag1": 0.0707070707070707,
+        "so2_lag1": 0.030303030303030304,
+        "co_lag1": 0.050505050505050504,
+        "o3_lag1": 0.0707070707070707
+      }
+    },
+    "gradient_boosting": {
+      "model_name": "gradient_boosting",
+      "train_mae": 7.5,
+      "train_rmse": 7.5,
+      "train_r2": 0.0,
+      "val_mae": 12.5,
+      "val_rmse": 12.5,
+      "val_r2": NaN,
+      "hyperparameters": {},
+      "feature_importance": {}
+    }
+  },
+  "comparison_table": {
+    "baseline": {
+      "mae": 20.0,
+      "rmse": 20.0,
+      "r2": NaN
+    },
+    "models": [
+      {
+        "name": "linear_regression",
+        "mae": 6.1842105263157805,
+        "rmse": 6.1842105263157805,
+        "r2": NaN
+      },
+      {
+        "name": "random_forest",
+        "mae": 9.275000000000006,
+        "rmse": 9.275000000000006,
+        "r2": NaN
+      },
+      {
+        "name": "gradient_boosting",
+        "mae": 12.5,
+        "rmse": 12.5,
+        "r2": NaN
+      }
+    ]
+  }
+}

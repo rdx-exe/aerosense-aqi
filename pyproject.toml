@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aqi-predict-ml"
+version = "0.1.0"
+description = "AI-Based Air Quality Index Prediction and Analysis Using Machine Learning"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "AQI Predict ML" }]
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "joblib",
+    "matplotlib",
+    "seaborn",
+    "plotly",
+    "requests",
+    "streamlit",
+    "pyyaml",
+    "python-dateutil",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ipython"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-ra -q"

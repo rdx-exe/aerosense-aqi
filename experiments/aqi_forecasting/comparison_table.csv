@@ -1,0 +1,4 @@
+Model,name,mae,rmse,r2
+linear_regression,linear_regression,6.1842105263157805,6.1842105263157805,
+random_forest,random_forest,9.275000000000006,9.275000000000006,
+gradient_boosting,gradient_boosting,12.5,12.5,

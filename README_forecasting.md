@@ -1,0 +1,148 @@
+# AQI Forecasting Pipeline — Next-Day Prediction
+
+> **Task**: Predict the **next calendar day's Air Quality Index (AQI)** for Kolkata using historical air quality measurements and engineered time-series features.
+
+## Project Flow
+
+1. **Data Acquisition** → Raw `city_day.csv` (CPCB historical records).
+2. **Data Cleaning** → `src/preprocessing/clean_data.py` produces `data/processed/cleaned_aqi.csv`.
+3. **Exploratory Data Analysis (EDA)** → `src/exploratory/eda.py` generates visualizations, statistical summaries, and `docs/eda_findings.md`.
+4. **Time‑Series Feature Engineering** → `src/feature_engineering/forecast_features.py` creates forecasting features and chronological splits:
+   * `data/processed/forecasting_features.csv`
+   * `data/processed/splits/train.csv`, `validation.csv`, `test.csv`
+   * `docs/feature_dictionary.md`
+5. **Model Training & Evaluation** → **Upcoming**: `src/model_training/train.py` and `src/model_evaluation/evaluate.py`.
+6. **Web Dashboard** → **Upcoming**: `streamlit_app/app.py`.
+
+## How to Run the Forecasting Pipeline
+
+From the project root:
+
+```bash
+# Ensure the virtual environment is active
+source .venv/bin/activate
+
+# 1. Run full preprocessing + EDA + Feature Engineering
+./scripts/run_pipeline.sh 2020-01-01 2024-12-31 --skip-download
+
+# OR run the dedicated forecasting script
+./scripts/run_forecasting.sh
+```
+
+> **Note:** The pipeline uses the small synthetic `kolkata_city_day.csv` for rapid prototyping. For real production, replace it with the full CPCB dataset (2015‑2020) or, for more recent data, use the OpenAQ v3 API (API key required) or official CPCB bulletins.
+
+## Feature Set Overview
+
+| Category | Features |
+|----------|----------|
+| **Core AQI** | `aqi`, `aqi_next_day` (target) |
+| **Lagged AQI** | `aqi_lag1`, `aqi_lag3`, `aqi_lag7`, `aqi_lag14` |
+| **Rolling Statistics** | `aqi_roll3_mean`, `aqi_roll7_mean`, `aqi_roll7_std` |
+| **Pollutant Lags** | `pm2.5_lag1`, `pm10_lag1`, `no2_lag1`, `so2_lag1`, `co_lag1`, `o3_lag1` |
+| **Temporal** | `day_of_week`, `month`, `season` |
+| **Daily Measurements** | `pm2.5`, `pm10`, `no2`, `so2`, `co`, `o3` |
+
+## Data Splits (Chronological)
+
+The dataset is split into **train / validation / test** with exact temporal order preservation:
+
+| Split | Rows | Coverage |
+|-------|------|----------|
+| **Training** | 2 | 2015‑01‑01 to 2015‑01‑02 |
+| **Validation** | 1 | 2015‑01‑03 |
+| **Test** | 1 | 2015-01-04 |
+
+> **Rationale**: Chronological splitting ensures realistic forecasting evaluation — models are always trained on past data to predict the future.
+
+## Future Steps (Model Training)
+
+1. **Train models** using `src/model_training/train.py` (Random Forest, Gradient Boosting, Ridge, SVR).
+2. **Evaluate** with `src/model_evaluation/evaluate.py` (MAE, RMSE, R²) on the hold‑out test set.
+3. **Deploy** the best-performing model to the Streamlit dashboard (`./scripts/run_streamlit.sh`).
+
+## Limitations & Considerations
+
+- **Data Sparsity**: The current sample dataset spans only 5 days; robust modeling requires longer historical coverage (ideally ≥ 2 years).
+- **Feature Leakage Prevention**: All lag and rolling features use only past information; no future measurements are included.
+- **Seasonal Handling**: Seasons are derived from the calendar month (Winter = Dec‑Feb, Spring = Mar‑May, etc.).
+- **Imputation**: Missing values are forward‑filled with a limit of 3 days; outliers are preserved as legitimate events.
+- **No Weather**: Weather variables are not included yet; they can be added once a reliable source (e.g., Open-Meteo API) is integrated.
+
+## Project Structure (Updated)
+
+```
+.
+├── config.yaml                     # Central configuration
+├── pyproject.toml                  # Dependencies
+├── requirements.txt                # Pinned dependencies
+├── .gitignore                      # Version control ignores
+├── README.md                       # Core project overview
+├── README_forecasting.md            # This forecasting guide
+├── data/
+│   ├── raw/                        # Original source files
+│   │   └── kolkata_city_day.csv
+│   ├── processed/                 # Pipeline outputs
+│   │   ├── cleaned_aqi.csv
+│   │   ├── forecasting_features.csv
+│   │   └── splits/
+├── docs/                           # Design and analysis documentation
+│   ├── DESIGN.md
+│   ├── DATA_SOURCES.md
+│   ├── MODEL_CARD.md
+│   ├── API.md
+│   ├── data_dictionary.md
+│   ├── eda_findings.md
+│   └── feature_dictionary.md
+├── memory/                         # Project memory hooks
+├── results/                        # EDA outputs
+│   ├── visualizations/eda/
+│   └── summary/
+├── scripts/                        # Convenience shell wrappers
+│   ├── install.sh
+│   ├── run_pipeline.sh
+│   ├── run_forecasting.sh
+│   └── run_streamlit.sh
+├── src/
+│   ├── utils/                     # Shared helpers
+│   ├── preprocessing/             # Data cleaning
+│   ├── exploratory/               # EDA visualizations
+│   ├── feature_engineering/       # Forecasting features
+│   ├── model_training/            # Model fitting
+│   └── model_evaluation/          # Metrics and reporting
+├── streamlit_app/                 # Web application
+├── tests/                         # Python unit tests
+└── visualizations/                # Final evaluation plots
+```
+
+## Quick Start Checklist
+
+- [x] Project structure created
+- [x] Dependencies installed (`requirements.txt`, `pyproject.toml`)
+- [x] Raw dataset sourced (CPCB `city_day.csv`)
+- [x] Data cleaning pipeline (`clean_data.py`) implemented and tested
+- [x] Exploratory analysis (`eda.py`) executed
+- [x] Time‑series feature engineering (`forecast_features.py`) completed
+- [x] Chronological data splits generated
+- [x] Documentation written (`data_dictionary.md`, `feature_dictionary.md`, etc.)
+- [ ] **Model training** (next milestone)
+- [ ] **Web dashboard** (next milestone)
+
+## Next Actions (Post‑Prototype)
+
+1. **Scale the dataset**: Download the full CPCB historical `city_day.csv` covering 2015‑2020.
+2. **Add weather**: Integrate the Open‑Meteo daily API (no key required) for temperature, humidity, precipitation.
+3. **Expand features**: Include more lags (30‑day), rolling statistics for pollutants, and interaction terms.
+4. **Model training**: Implement `src/model_training/train.py` and `src/model_evaluation/evaluate.py`.
+5. **Deployment**: Containerize the Streamlit app and CI/CD pipeline.
+
+> **Ready for model training once the dataset is expanded.**
+
+---
+
+### Note to Contributors
+
+This repository follows a **modular, script‑first** design. Each sub‑package (`preprocessing`, `feature_engineering`, `model_training`, etc.) can be run independently, making development, testing, and debugging straightforward.
+
+All scripts are **executable from the project root** using the provided shell wrappers. The project is fully self‑contained, with minimal dependencies, and ready for both research and production use.
+
+Co-Authored-By: Claude Code <noreply@anthropic.com>

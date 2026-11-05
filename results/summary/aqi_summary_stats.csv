@@ -1,0 +1,9 @@
+index,AQI,Metric
+count,5.0,Count
+mean,151.4,Mean
+std,7.402702209328699,Std
+min,140.0,Min
+25%,150.0,25%
+50%,152.0,50%
+75%,155.0,75%
+max,160.0,Max

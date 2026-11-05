@@ -1,0 +1,25 @@
+Metric,Value
+Initial Record Count,5
+Final Record Count,5
+Duplicate Records,0
+Date Range Start,2015-01-01
+Date Range End,2015-01-05
+Removed Columns,city
+Missing Before — city,0
+Missing Before — date,0
+Missing Before — pm2.5,1
+Missing Before — pm10,1
+Missing Before — no2,0
+Missing Before — so2,0
+Missing Before — co,0
+Missing Before — o3,0
+Missing Before — aqi,0
+Missing Before — aqi_bucket,0
+Missing After — pm2.5,0
+Missing After — pm10,0
+Missing After — no2,0
+Missing After — so2,0
+Missing After — co,0
+Missing After — o3,0
+Missing After — aqi,0
+Missing After — aqi_bucket,0
