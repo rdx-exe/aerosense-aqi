@@ -125,8 +125,9 @@ train → evaluate → save artifacts.
 ```bash
 python -m src.preprocessing.clean          # → data/processed/clean.csv
 python -m src.feature_engineering.features # → data/processed/features.csv
-python -m src.model_training.train         # → models/*.pkl
-python -m src.model_evaluation.evaluate    # → visualizations/*.png
+python -m src.model_training.prepare_data  # → chronological splits
+python -m src.model_training.train         # → models/*.pkl + models/best_model.json
+python -m src.model_evaluation.evaluate_final  # → results/, documentation/model_evaluation.md
 ```
 
 ### Launch the Streamlit app

@@ -1,8 +1,11 @@
 #!/bin/bash
-# Run the complete AQI forecasting pipeline
-# 1. Feature engineering
-# 2. Chronological data splitting
-# 3. Data inspection
+# Rebuild the forecasting feature table and chronological splits.
+#
+# This script intentionally uses the full processed dataset
+# (data/processed/clean.csv → features.csv) rather than the legacy 5-row
+# smoke-test fixture. Model training and evaluation are separate steps:
+#   ./scripts/run_model_training.sh
+#   ./scripts/run_final_evaluation.sh
 
 set -euo pipefail
 
@@ -11,16 +14,17 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 cd "$PROJECT_ROOT"
 
-echo "==> Running feature engineering..."
-python3 -m src.feature_engineering.forecast_features
+if [ -f ".venv/bin/activate" ]; then
+    # shellcheck disable=SC1091
+    source .venv/bin/activate
+fi
 
-echo "==> Data inspection..."
-python3 -c "
-import pandas as pd
-from src.feature_engineering.forecast_features import create_forecasting_features, split_chronological_data
-print('Data loading and feature engineering completed.')
-print('\\nFeature set created successfully.')
-print('\\nNote: Model training pipeline not executed yet.')
-"
+echo "==> Building features from data/processed/clean.csv..."
+python -m src.feature_engineering.features
+
+echo "==> Creating chronological train/validation/test splits..."
+python -m src.model_training.prepare_data
 
 echo "==> Done."
+echo "==> Next: ./scripts/run_model_training.sh"
+echo "==> Then: ./scripts/run_final_evaluation.sh"

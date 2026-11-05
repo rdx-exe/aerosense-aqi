@@ -1,8 +1,13 @@
 #!/bin/bash
-# Run the complete machine learning pipeline
-# 1. Feature engineering (if needed)
-# 2. Model training and validation
-# 3. Model comparison and selection
+# Run model training and validation-only model selection.
+#
+# 1. Build chronological train/validation/test splits from the full processed
+#    feature table (data/processed/features.csv).
+# 2. Train all candidate models on the training split.
+# 3. Select the best model using validation RMSE only.
+# 4. Save models and models/best_model.json for the final evaluation.
+#
+# The test split is written by step 1 but is never read by the training code.
 
 set -euo pipefail
 
@@ -11,22 +16,18 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 cd "$PROJECT_ROOT"
 
-# Ensure dependencies are installed
-source .venv/bin/activate
-
-# Step 1: Run feature engineering if splits don't exist
-if [ ! -f "data/processed/splits/train.csv" ] || [ ! -f "data/processed/splits/validation.csv" ]; then
-    echo "==> Running feature engineering (forecasting features)..."
-    python3 -m src.feature_engineering.forecast_features
+if [ -f ".venv/bin/activate" ]; then
+    # shellcheck disable=SC1091
+    source .venv/bin/activate
 fi
 
-# Step 2: Run model training
-echo "==> Starting model training..."
-python3 -m src.model_training.train
+echo "==> Preparing chronological splits from data/processed/features.csv..."
+python -m src.model_training.prepare_data
 
-# Step 3: Summary
+echo "==> Starting model training (selection uses validation only)..."
+python -m src.model_training.train
+
 echo "==> Experiment completed."
-echo "==> Check experiments/aqi_forecasting/ for detailed logs and saved models."
-
-echo "==> To run the Streamlit dashboard later:"
-echo "   ./scripts/run_streamlit.sh"
+echo "==> Selection record: models/best_model.json"
+echo "==> Check experiments/aqi_forecasting/ for logs and the comparison table."
+echo "==> Run ./scripts/run_final_evaluation.sh for the independent test evaluation."

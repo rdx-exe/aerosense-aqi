@@ -99,8 +99,16 @@ class ExperimentLogger:
             "models": model_metrics
         }
 
-        df = pd.DataFrame(model_metrics)
-        df.insert(0, "Model", [m["name"] for m in model_metrics])
+        rows = [
+            {
+                "model": m.get("name", m.get("model", "")),
+                "mae": m.get("mae"),
+                "rmse": m.get("rmse"),
+                "r2": m.get("r2"),
+            }
+            for m in model_metrics
+        ]
+        df = pd.DataFrame(rows)
         self.logger.info(f"Model Comparison:\n{df.to_string(index=False)}")
 
         self.experiment_info["comparison_table"] = comparison

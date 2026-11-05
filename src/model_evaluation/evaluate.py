@@ -1,77 +1,20 @@
-"""Model evaluation pipeline.
+"""Legacy evaluation entry point.
 
-Computes test-set metrics (MAE, RMSE, R²), generates residual plots and
-feature-importance figures, and writes a markdown evaluation report.
+The project's authoritative evaluation is
+:func:`src.model_evaluation.evaluate_final.evaluate_final_model`, which loads
+the validation-selected model and evaluates it once on the frozen test split.
 
-All figures are saved to the configured ``visualizations_dir``.
+This module is retained as a thin compatibility wrapper for older callers
+(e.g. ``src.scripts.run_pipeline``).  It does **not** retrain models and it
+does not compute metrics from any data other than the saved test predictions.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import numpy as np
 import pandas as pd
 
-from ..utils.config import get_path, load_config
-from ..utils.io import read_csv
-from ..model_training.train import train_models
-
-
-def _metrics(y_true: pd.Series, y_pred: np.ndarray) -> dict:
-    """Compute MAE, RMSE and R²."""
-    y_true = np.asarray(y_true, dtype=float)
-    y_pred = np.asarray(y_pred, dtype=float)
-    mae = float(np.mean(np.abs(y_true - y_pred)))
-    rmse = float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
-    ss_res = float(np.sum((y_true - y_pred) ** 2))
-    ss_tot = float(np.sum((y_true - np.mean(y_true)) ** 2))
-    r2 = float(1 - ss_res / ss_tot) if ss_tot != 0 else float("nan")
-    return {"mae": mae, "rmse": rmse, "r2": r2}
-
-
-def _plot_residuals(y_true: pd.Series, y_pred: np.ndarray, out_path: Path) -> None:
-    """Save a residual plot (pred vs residual) to ``out_path``."""
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    residuals = np.asarray(y_true, dtype=float) - np.asarray(y_pred, dtype=float)
-
-    fig, ax = plt.subplots(figsize=(7, 5))
-    ax.scatter(y_pred, residuals, alpha=0.6, s=28, edgecolors="none")
-    ax.axhline(0, color="red", linestyle="--", linewidth=1)
-    ax.set_xlabel("Predicted AQI")
-    ax.set_ylabel("Residual (actual − predicted)")
-    ax.set_title("Residual Plot — AQI Prediction")
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=120)
-    plt.close(fig)
-
-
-def _plot_feature_importance(model, feature_names: list, out_path: Path) -> None:
-    """Save a feature-importance bar chart for tree-based models."""
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    if not hasattr(model, "feature_importances_"):
-        return
-
-    importances = np.asarray(model.feature_importances_)
-    order = np.argsort(importances)[::-1][:15]
-    names = [feature_names[i] for i in order]
-    vals = importances[order]
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.barh(names[::-1], vals[::-1], color="#4C72B0")
-    ax.set_xlabel("Feature importance")
-    ax.set_title("Top 15 Feature Importances")
-    fig.tight_layout()
-    fig.savefig(out_path, dpi=120)
-    plt.close(fig)
+from ..utils.config import get_path
+from .evaluate_final import evaluate_final_model
 
 
 def evaluate_models(
@@ -80,78 +23,34 @@ def evaluate_models(
     config: dict | None = None,
     features_path: str | None = None,
 ) -> dict:
-    """Train models, evaluate on the test set, and write artifacts.
+    """Run the final evaluation and return a legacy-compatible result dict.
 
-    Returns
-    -------
-    dict
-        ``{"metrics": {name: dict}, "best": str, "y_test": Series,
-        "predictions": {name: ndarray}}``
+    ``features``, ``config`` and ``features_path`` are accepted for backwards
+    compatibility but are intentionally unused: evaluation must use the same
+    frozen test split and the same validation-selected model every time.
     """
-    if config is None:
-        config = load_config()
+    result = evaluate_final_model()
 
-    vis_dir = get_path(config.get("visualizations_dir", "visualizations"))
-    vis_dir.mkdir(parents=True, exist_ok=True)
+    predictions_path = get_path("results", "metrics", "test_predictions.csv")
+    predictions_df = pd.read_csv(predictions_path, parse_dates=["date"])
 
-    trained = train_models(features, config=config, features_path=features_path)
-    best = trained["best"]
-    X_test = trained["X_test"]
-    y_test = trained["y_test"]
-    feature_names = trained["feature_names"]
-
-    metrics: dict[str, dict] = {}
-    predictions: dict[str, np.ndarray] = {}
-
-    for name, model in trained["models"].items():
-        pred = model.predict(X_test)
-        m = _metrics(y_test, pred)
-        metrics[name] = m
-        predictions[name] = pred
-        print(
-            f"[eval ] {name:<18} test_mae={m['mae']:7.2f}  "
-            f"test_rmse={m['rmse']:7.2f}  test_r2={m['r2']:6.3f}"
-        )
-
-    # Residual plot for the best model
-    _plot_residuals(y_test, predictions[best], vis_dir / "residuals.png")
-    _plot_feature_importance(
-        trained["models"][best], feature_names, vis_dir / "feature_importance.png"
-    )
-
-    # Markdown report
-    _write_report(metrics, best, vis_dir)
-
+    model_name = result["best_model"]
     return {
-        "metrics": metrics,
-        "best": best,
-        "y_test": y_test,
-        "predictions": predictions,
+        "metrics": {
+            model_name: result["test_metrics"],
+            "persistence_baseline": result["baseline_metrics"],
+        },
+        "best": model_name,
+        "y_test": predictions_df["actual_aqi"],
+        "predictions": {
+            model_name: predictions_df["predicted_aqi"].to_numpy(),
+            "persistence_baseline": predictions_df["baseline_aqi"].to_numpy(),
+        },
     }
 
 
-def _write_report(metrics: dict, best: str, vis_dir: Path) -> None:
-    """Write a markdown evaluation report."""
-    lines = [
-        "# AQI Model Evaluation Report",
-        "",
-        f"**Best model:** `{best}`",
-        "",
-        "| Model | MAE | RMSE | R² |",
-        "|-------|-----|------|----|",
-    ]
-    for name, m in metrics.items():
-        lines.append(
-            f"| {name} | {m['mae']:.2f} | {m['rmse']:.2f} | {m['r2']:.3f} |"
-        )
-    lines += ["", "## Artifacts", "", "- `residuals.png`", "- `feature_importance.png`"]
-    report_path = vis_dir / "report.md"
-    report_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"[eval ] Report written → {report_path}")
-
-
 def main() -> None:
-    """CLI entry point: evaluate models on the test set."""
+    """CLI entry point: run the final evaluation."""
     evaluate_models()
 
 

@@ -23,6 +23,8 @@ from ..utils.config import get_path, load_config
 from ..utils.io import read_csv
 from ..preprocessing.clean import clean_raw_data
 from ..feature_engineering.features import build_features
+from ..model_training.prepare_data import prepare_splits
+from ..model_training.train import main as train_main
 from ..model_evaluation.evaluate import evaluate_models
 
 
@@ -72,7 +74,13 @@ def run_pipeline(start: str = "2020-01-01", end: str = "2024-12-31") -> int:
     features.reset_index().to_csv(features_out, index=False)
     print(f"[pipeline] Features → {features_out} ({len(features)} rows)")
 
-    # 4 & 5. Train + evaluate
+    # 4. Chronological splits (written once; training never reads test.csv)
+    prepare_splits(features_out)
+
+    # 5. Train candidates and select the best model using validation only
+    train_main()
+
+    # 6. Final, independent test evaluation
     results = evaluate_models(features, config=config)
     print(
         f"[pipeline] Done. Best model: {results['best']} "

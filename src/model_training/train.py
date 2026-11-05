@@ -24,6 +24,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
+from sklearn.svm import SVR
 
 from ..utils.config import get_path, load_config
 from ..utils.io import load_model, save_model
@@ -69,6 +70,13 @@ def create_models(config: dict) -> dict:
         max_depth=8,
         random_state=42
     )
+
+    # Support Vector Regression (scaled, as in the configured candidate list)
+    models["svr"] = Pipeline([
+        ("imputer", SimpleImputer(strategy="mean")),
+        ("scaler", StandardScaler()),
+        ("regressor", SVR(C=100.0, gamma="scale", epsilon=0.1)),
+    ])
 
     # XGBoost (if available)
     if XGB_AVAILABLE:
@@ -202,8 +210,15 @@ def save_models(
     val_results: dict,
     best_model_name: str,
     experiment_dir: Path,
+    feature_names: list[str],
+    split_info: dict | None = None,
 ) -> dict:
-    """Save trained models using Joblib."""
+    """Save trained models using Joblib, including the exact feature contract.
+
+    The feature column list is persisted with every model so that evaluation
+    can rebuild the test matrix in the same order without guessing from the
+    test file.
+    """
     saved_models = {}
 
     for model_name, result in val_results.items():
@@ -213,8 +228,18 @@ def save_models(
             "training_metrics": result["train_metrics"],
             "validation_metrics": result["val_metrics"],
             "feature_importance": result["feature_importance"],
-            "timestamp": pd.Timestamp.now().isoformat()
+            "feature_columns": list(feature_names),
+            "n_features": len(feature_names),
+            "selected_best_model": model_name == best_model_name,
+            "test_split_used_during_training": False,
+            "timestamp": pd.Timestamp.now().isoformat(),
         }
+        if split_info is not None:
+            metadata["split_info"] = {
+                "split_rows": split_info.get("split_rows"),
+                "date_ranges": split_info.get("date_ranges"),
+                "purged_boundary_rows": split_info.get("purged_boundary_rows"),
+            }
 
         model_path = save_model_with_metadata(model, model_name, metadata)
         saved_models[model_name] = model_path
@@ -222,6 +247,74 @@ def save_models(
         print(f"[Model Training] Saved {model_name} to {model_path}")
 
     return saved_models
+
+
+def save_best_model_selection(
+    best_model_name: str,
+    val_results: dict,
+    baseline_metrics: dict,
+    feature_names: list[str],
+    split_info: dict | None,
+    experiment_dir: Path,
+) -> Path:
+    """Persist the validation-only model-selection record.
+
+    This file is the contract used by the final evaluation script.  It records
+    the selected model, the validation metrics, and the exact feature list.
+    No test-set metric is present in this file.
+    """
+    best_val = val_results[best_model_name]["val_metrics"]
+    baseline_rmse = float(baseline_metrics["rmse"])
+    val_rmse = float(best_val["rmse"])
+    improvement = (
+        (baseline_rmse - val_rmse) / baseline_rmse * 100.0
+        if baseline_rmse > 0
+        else float("nan")
+    )
+
+    selection = {
+        "model_name": best_model_name,
+        "selected_by": "validation_rmse",
+        "selection_rule": (
+            "Lowest validation RMSE among candidates that improve the "
+            "persistence baseline by more than 5%; if none do, fall back to "
+            "the lowest validation RMSE."
+        ),
+        "validation_metrics": best_val,
+        "baseline_validation_metrics": baseline_metrics,
+        "validation_rmse_improvement_pct": improvement,
+        "candidate_validation_metrics": {
+            name: result["val_metrics"] for name, result in val_results.items()
+        },
+        "feature_columns": list(feature_names),
+        "n_features": len(feature_names),
+        "test_split_used_during_training": False,
+        "selected_at": pd.Timestamp.now().isoformat(),
+    }
+    if split_info is not None:
+        selection["split_info"] = {
+            "split_rows": split_info.get("split_rows"),
+            "date_ranges": split_info.get("date_ranges"),
+            "target_stats": split_info.get("target_stats"),
+            "purged_boundary_rows": split_info.get("purged_boundary_rows"),
+            "purge_policy": split_info.get("purge_policy"),
+        }
+
+    best_path = get_path("models", "best_model.json")
+    best_path.parent.mkdir(parents=True, exist_ok=True)
+    best_path.write_text(json.dumps(selection, indent=2), encoding="utf-8")
+    print(f"[Model Training] Best-model selection record → {best_path}")
+
+    experiment_selection_path = experiment_dir / "final_selection.json"
+    experiment_selection_path.write_text(
+        json.dumps(selection, indent=2), encoding="utf-8"
+    )
+    print(
+        "[Model Training] Experiment selection record → "
+        f"{experiment_selection_path}"
+    )
+
+    return best_path
 
 
 def main() -> None:
@@ -238,9 +331,18 @@ def main() -> None:
 
     # Load training data
     data_path = get_path("data/processed/splits", "train.csv")
-    if not data_path.is_file():
-        print("[Model Training] ERROR: Training data not found. Run feature engineering first.")
+    val_path = get_path("data/processed/splits", "validation.csv")
+    if not data_path.is_file() or not val_path.is_file():
+        print(
+            "[Model Training] ERROR: train/validation split not found. "
+            "Run `python -m src.model_training.prepare_data` first."
+        )
         sys.exit(1)
+
+    split_info_path = get_path("data/processed/splits", "split_info.json")
+    split_info = None
+    if split_info_path.is_file():
+        split_info = json.loads(split_info_path.read_text(encoding="utf-8"))
 
     train_df = pd.read_csv(data_path, parse_dates=["date"])
 
@@ -255,7 +357,6 @@ def main() -> None:
     y = train_df["aqi_next_day"]
 
     # Load validation data
-    val_path = get_path("data/processed/splits", "validation.csv")
     val_df = pd.read_csv(val_path, parse_dates=["date"])
 
     X_val = val_df[feature_cols]
@@ -280,13 +381,30 @@ def main() -> None:
     ]
     logger.log_comparison_table(baseline_metrics, model_comparison)
 
-    # Select best model
+    # Select best model using validation performance only
     best_model_name = select_best_model(val_results, baseline_metrics, logger=logger)
 
-    # Save models
-    saved_models = save_models(val_results, best_model_name, logger.experiment_dir)
+    # Save models and the validation-only selection record
+    saved_models = save_models(
+        val_results,
+        best_model_name,
+        logger.experiment_dir,
+        feature_cols,
+        split_info=split_info,
+    )
+    save_best_model_selection(
+        best_model_name,
+        val_results,
+        baseline_metrics,
+        feature_cols,
+        split_info,
+        logger.experiment_dir,
+    )
 
     # Save experiment info
+    logger.experiment_info["best_model"] = best_model_name
+    logger.experiment_info["feature_columns"] = feature_cols
+    logger.experiment_info["test_split_used_during_training"] = False
     logger.save_experiment_info()
 
     print("[Model Training] Experiment completed successfully.")

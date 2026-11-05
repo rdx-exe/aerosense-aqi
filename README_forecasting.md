@@ -7,12 +7,12 @@
 1. **Data Acquisition** → Raw `city_day.csv` (CPCB historical records).
 2. **Data Cleaning** → `src/preprocessing/clean_data.py` produces `data/processed/cleaned_aqi.csv`.
 3. **Exploratory Data Analysis (EDA)** → `src/exploratory/eda.py` generates visualizations, statistical summaries, and `docs/eda_findings.md`.
-4. **Time‑Series Feature Engineering** → `src/feature_engineering/forecast_features.py` creates forecasting features and chronological splits:
-   * `data/processed/forecasting_features.csv`
+4. **Time‑Series Feature Engineering** → `src/feature_engineering/features.py` builds the full lag/rolling feature table from the 2-year cleaned dataset; `src/model_training/prepare_data.py` creates chronological train/validation/test splits:
+   * `data/processed/features.csv`
    * `data/processed/splits/train.csv`, `validation.csv`, `test.csv`
-   * `docs/feature_dictionary.md`
-5. **Model Training & Evaluation** → **Upcoming**: `src/model_training/train.py` and `src/model_evaluation/evaluate.py`.
-6. **Web Dashboard** → **Upcoming**: `streamlit_app/app.py`.
+   * `data/processed/splits/split_info.json`
+5. **Model Training & Evaluation** → `src/model_training/train.py` trains candidates and selects by validation RMSE; `src/model_evaluation/evaluate_final.py` runs the independent test evaluation.
+6. **Web Dashboard** → **Not started** (deliberately blocked until final evaluation is complete).
 
 ## How to Run the Forecasting Pipeline
 
@@ -44,29 +44,45 @@ source .venv/bin/activate
 
 ## Data Splits (Chronological)
 
-The dataset is split into **train / validation / test** with exact temporal order preservation:
+The full processed feature table (721 rows) is split into **train / validation / test**
+with exact temporal order preservation. One boundary row is purged between
+adjacent splits so that the last target in one split does not belong to the
+next split.
 
 | Split | Rows | Coverage |
 |-------|------|----------|
-| **Training** | 2 | 2015‑01‑01 to 2015‑01‑02 |
-| **Validation** | 1 | 2015‑01‑03 |
-| **Test** | 1 | 2015-01-04 |
+| **Training** | 503 | 2022‑01‑08 to 2023‑05‑26 |
+| **Validation** | 107 | 2023‑05‑28 to 2023‑09‑11 |
+| **Test** | 109 | 2023‑09‑13 to 2023‑12‑30 |
 
-> **Rationale**: Chronological splitting ensures realistic forecasting evaluation — models are always trained on past data to predict the future.
+> **Rationale**: Chronological splitting ensures realistic forecasting evaluation — models are always trained on past data to predict the future. The test split is written once and is never read by the training script.
 
-## Future Steps (Model Training)
+## Reproducing Training and Final Evaluation
 
-1. **Train models** using `src/model_training/train.py` (Random Forest, Gradient Boosting, Ridge, SVR).
-2. **Evaluate** with `src/model_evaluation/evaluate.py` (MAE, RMSE, R²) on the hold‑out test set.
-3. **Deploy** the best-performing model to the Streamlit dashboard (`./scripts/run_streamlit.sh`).
+```bash
+source .venv/bin/activate
+
+# 1. Rebuild features + chronological splits
+./scripts/run_forecasting.sh
+
+# 2. Train candidates; select the best model on validation only
+./scripts/run_model_training.sh
+
+# 3. Independent test evaluation (no retraining)
+./scripts/run_final_evaluation.sh
+```
+
+The final report is `documentation/model_evaluation.md`; the metrics table is
+`results/metrics/final_metrics.csv`.
 
 ## Limitations & Considerations
 
-- **Data Sparsity**: The current sample dataset spans only 5 days; robust modeling requires longer historical coverage (ideally ≥ 2 years).
-- **Feature Leakage Prevention**: All lag and rolling features use only past information; no future measurements are included.
+- **Dataset Scope**: The current evaluation uses a 2-year processed prototyping dataset, not a live official CPCB feed. Results should not be generalised to another city or period without retraining and re-evaluation.
+- **Feature Leakage Prevention**: All lag and rolling features use only past/current information; no future measurements are included.
 - **Seasonal Handling**: Seasons are derived from the calendar month (Winter = Dec‑Feb, Spring = Mar‑May, etc.).
 - **Imputation**: Missing values are forward‑filled with a limit of 3 days; outliers are preserved as legitimate events.
 - **No Weather**: Weather variables are not included yet; they can be added once a reliable source (e.g., Open-Meteo API) is integrated.
+- **Weak day-to-day predictability**: lag‑1 AQI autocorrelation is low in this dataset, so next-day AQI is difficult to predict from lagged pollutant features alone.
 
 ## Project Structure (Updated)
 
@@ -124,18 +140,19 @@ The dataset is split into **train / validation / test** with exact temporal orde
 - [x] Time‑series feature engineering (`forecast_features.py`) completed
 - [x] Chronological data splits generated
 - [x] Documentation written (`data_dictionary.md`, `feature_dictionary.md`, etc.)
-- [ ] **Model training** (next milestone)
-- [ ] **Web dashboard** (next milestone)
+- [x] **Model training** (validation-only model selection)
+- [x] **Final test-set evaluation** (`documentation/model_evaluation.md`)
+- [ ] **Web dashboard** (blocked until final evaluation is reviewed)
 
 ## Next Actions (Post‑Prototype)
 
-1. **Scale the dataset**: Download the full CPCB historical `city_day.csv` covering 2015‑2020.
+1. **Scale and validate the dataset**: Replace the 2-year prototyping series with the full CPCB historical `city_day.csv` covering 2015‑2020 and verify provenance.
 2. **Add weather**: Integrate the Open‑Meteo daily API (no key required) for temperature, humidity, precipitation.
 3. **Expand features**: Include more lags (30‑day), rolling statistics for pollutants, and interaction terms.
-4. **Model training**: Implement `src/model_training/train.py` and `src/model_evaluation/evaluate.py`.
-5. **Deployment**: Containerize the Streamlit app and CI/CD pipeline.
+4. **Strengthen evaluation**: Add rolling-origin validation and a second chronological test window.
+5. **Deployment**: Only after the evaluation limitations are accepted, containerise the Streamlit app and CI/CD pipeline.
 
-> **Ready for model training once the dataset is expanded.**
+> The current model is suitable for an educational pipeline demonstration, not for operational AQI alerts. See `documentation/model_evaluation.md` for the evidence.
 
 ---
 

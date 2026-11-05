@@ -196,10 +196,18 @@ def split_chronological_data(
     feature_df: pd.DataFrame,
     train_ratio: float = 0.70,
     val_ratio: float = 0.15,
-    output_dir: str | Path = "data/processed/splits",
+    output_dir: str | Path = "data/processed/splits_legacy",
 ) -> dict:
     """
     Split data chronologically into train, validation, and test sets.
+
+    .. note::
+       This is the legacy smoke-test splitter. The authoritative splits for
+       final training and evaluation are produced by
+       :func:`src.model_training.prepare_data.prepare_splits`, which also
+       purges boundary rows and writes ``split_info.json``. The default output
+       directory here is deliberately different so that running this helper
+       cannot overwrite the final evaluation splits.
 
     Returns:
         Dictionary containing train, val, and test DataFrames
@@ -249,16 +257,22 @@ def split_chronological_data(
 
 
 def main() -> None:
-    print("[Feature Engineering] Starting time-series feature engineering...")
+    print(
+        "[Feature Engineering] LEGACY smoke-test feature builder. "
+        "Use `python -m src.feature_engineering.features` followed by "
+        "`python -m src.model_training.prepare_data` for the final pipeline."
+    )
 
     # Create forecasting features
     feature_df, feature_dict = create_forecasting_features()
 
-    # Create chronological splits
+    # Create chronological splits in the legacy directory so the final
+    # evaluation splits are not overwritten.
     split_results = split_chronological_data(feature_df)
 
     print("[Feature Engineering] Feature engineering completed successfully.")
     print(f"[Feature Engineering] Created {len(feature_dict['numeric_features'])} numeric features and {len(feature_dict['categorical_features'])} categorical features.")
+    print("[Feature Engineering] Legacy splits written to data/processed/splits_legacy.")
 
 
 if __name__ == "__main__":
