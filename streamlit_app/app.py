@@ -1,139 +1,195 @@
-"""Streamlit web app for Kolkata next-day AQI prediction.
+"""Kolkata next-day AQI dashboard — single Streamlit entry point.
 
-Run with::
+Launch from the project root::
 
     streamlit run streamlit_app/app.py
 
-The app loads the persisted best model (or trains it on the fly if absent),
-displays the latest AQI trend, and predicts tomorrow's AQI.
+The app loads the persisted, validation-selected model and the existing
+evaluation artifacts.  It never trains a model at start-up and never uses
+future observations to build prediction features.
 """
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
 import streamlit as st
 
-# Allow running both as a module and as a script
-sys_path = str(Path(__file__).resolve().parent.parent)
-import sys  # noqa: E402
+# Allow ``streamlit run streamlit_app/app.py`` from any working directory.
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-if sys_path not in sys.path:
-    sys.path.insert(0, sys_path)
+from streamlit_app.components import (  # noqa: E402
+    historical,
+    insights,
+    overview,
+    performance,
+    prediction,
+    project_info,
+)
+from streamlit_app.components.data_service import (  # noqa: E402
+    DashboardDataError,
+    load_historical_data,
+    load_model_bundle,
+)
+from streamlit_app.components.theme import (  # noqa: E402
+    PALETTE,
+    inject_css,
+)
 
-from src.utils.config import get_path, load_config  # noqa: E402
-from src.utils.io import load_model, read_csv  # noqa: E402
-from src.feature_engineering.features import build_features  # noqa: E402
-from src.preprocessing.clean import clean_raw_data  # noqa: E402
+PAGE_TITLE = "Kolkata AQI Intelligence"
+SECTIONS = {
+    "Overview": overview.render,
+    "Historical air quality": historical.render,
+    "AQI prediction": prediction.render,
+    "Model performance": performance.render,
+    "Environmental insights": insights.render,
+    "Project information": project_info.render,
+}
+
+FOOTER = f"""
+<div class="aqi-footer">
+    <b>Kolkata AQI Intelligence</b> · Research dashboard for next-day AQI prediction.<br>
+    Historical observations come from the repository's processed dataset. Forecasts are
+    model-generated estimates, not live or official AQI readings. AQI in this project is
+    derived from PM2.5 using US-EPA breakpoints. The selected model has near-zero
+    explanatory power on the held-out test window and should not be used for health or
+    policy decisions.<br>
+    <span style="color:{PALETTE['muted']};">Launch:
+    <code>streamlit run streamlit_app/app.py</code></span>
+</div>
+"""
 
 
-@st.cache_data(show_spinner=False)
-def _load_data() -> pd.DataFrame:
-    """Load raw data, clean it, and build features (cached)."""
-    config = load_config()
-    raw_dir = get_path(config["data"]["raw_dir"])
-    raw_files = list(raw_dir.glob("*.csv"))
-    if not raw_files:
-        return pd.DataFrame()
-    raw = read_csv(raw_files[0])
-    clean = clean_raw_data(raw, config=config)
-    return build_features(clean, config=config)
+def _configure_page() -> None:
+    st.set_page_config(
+        page_title=PAGE_TITLE,
+        page_icon="🌿",
+        layout="wide",
+        initial_sidebar_state="expanded",
+        menu_items={
+            "About": (
+                "Kolkata AQI Intelligence — an academic next-day AQI forecasting "
+                "dashboard. Historical snapshot only; no live data."
+            )
+        },
+    )
+    st.markdown(inject_css(), unsafe_allow_html=True)
 
 
-@st.cache_resource(show_spinner=False)
-def _load_model(name: str):
-    """Load a persisted model, or return None if not yet trained."""
-    path = get_path("models", f"{name}.pkl")
-    if not path.is_file():
-        return None
-    return load_model(path)
+def _sidebar(historical, bundle) -> str:
+    with st.sidebar:
+        st.markdown(
+            f"""
+            <div style="padding:0.2rem 0 0.6rem 0;">
+                <div style="display:flex;align-items:center;gap:0.55rem;">
+                    <span style="font-size:1.55rem;line-height:1;">🌿</span>
+                    <div>
+                        <div style="font-weight:800;font-size:1.02rem;color:#14281D;">
+                            AQI Intelligence
+                        </div>
+                        <div style="font-size:0.72rem;color:{PALETTE['muted']};letter-spacing:0.08em;text-transform:uppercase;">
+                            Kolkata · Machine Learning
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.divider()
+
+        section = st.radio(
+            "Navigation",
+            options=list(SECTIONS),
+            index=0,
+            label_visibility="collapsed",
+        )
+
+        st.divider()
+        latest_date = historical.index.max().strftime("%d %b %Y")
+        first_year = int(historical.index.min().year)
+        last_year = int(historical.index.max().year)
+        year_label = (
+            str(first_year) if first_year == last_year else f"{first_year}–{last_year}"
+        )
+        st.markdown(
+            f"""
+            <div class="aqi-callout info" style="font-size:0.78rem;line-height:1.45;">
+                <b>Data status</b><br>
+                Historical snapshot<br>
+                Latest observation: <b>{latest_date}</b><br>
+                {len(historical):,} daily rows · {year_label}<br><br>
+                <b>Model</b><br>
+                {bundle.model_name.replace('_', ' ').title()} ({len(bundle.feature_columns)} features)<br>
+                Loaded from disk — not retrained here.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.caption(
+            "AQI is derived from PM2.5 (US-EPA). Forecasts are model estimates, "
+            "not live readings."
+        )
+
+    return section
+
+
+def _render_data_error(error: Exception) -> None:
+    st.error("The dashboard cannot start because a required artifact is missing or invalid.")
+    st.markdown(f"**Details:** {error}")
+    st.markdown(
+        """
+        **Recover the artifacts from the project root:**
+
+        ```bash
+        source .venv/bin/activate
+        ./scripts/run_forecasting.sh
+        ./scripts/run_model_training.sh
+        ./scripts/run_final_evaluation.sh
+        streamlit run streamlit_app/app.py
+        ```
+        """
+    )
+    st.info(
+        "The dashboard loads a saved model. It deliberately does not train one "
+        "at start-up, so the training and evaluation artifacts must exist first."
+    )
 
 
 def main() -> None:
-    st.set_page_config(
-        page_title="Kolkata AQI Prediction",
-        page_icon="🌤️",
-        layout="wide",
-    )
-    st.title("🌤️ Kolkata Air Quality Index Prediction")
-    st.markdown("Forecasting **next-day AQI** for Kolkata, West Bengal.")
+    _configure_page()
 
-    with st.sidebar:
-        st.header("Settings")
-        model_name = st.selectbox(
-            "Model",
-            ["random_forest", "gradient_boosting", "ridge", "svr"],
-            index=0,
-        )
-        st.caption("Data source: OpenAQ API (free, no key required).")
-
-    df = _load_data()
-    if df.empty:
-        st.warning(
-            "No raw data found. Run "
-            "`python -m src.scripts.download_data --start 2020-01-01 --end 2024-12-31` "
-            "first."
-        )
+    try:
+        historical_data = load_historical_data()
+        bundle = load_model_bundle()
+    except DashboardDataError as exc:
+        _render_data_error(exc)
+        return
+    except Exception as exc:  # pragma: no cover - defensive boundary
+        _render_data_error(exc)
+        with st.expander("Technical details", expanded=False):
+            st.exception(exc)
         return
 
-    target = "aqi_next_day"
-    feature_cols = [c for c in df.columns if c != target]
+    section = _sidebar(historical_data, bundle)
 
-    # ── Latest AQI trend ─────────────────────────────────────────────────
-    st.subheader("Latest AQI Trend")
-    if "aqi" in df.columns:
-        recent = df["aqi"].tail(30)
-        st.line_chart(recent)
-    else:
-        st.info("No 'aqi' column available for trend plotting.")
-
-    # ── Prediction ────────────────────────────────────────────────────────
-    st.subheader("Next-Day AQI Prediction")
-    model = _load_model(model_name)
-    if model is None:
+    try:
+        SECTIONS[section]()
+    except DashboardDataError as exc:
+        st.error(f"**{section} could not be rendered.** {exc}")
         st.info(
-            f"Model '{model_name}' not found. Train it with "
-            "`python -m src.model_training.train`."
+            "Check that the files in `models/` and `results/metrics/` are present "
+            "and were produced by the project's evaluation scripts."
         )
-        return
+    except Exception as exc:  # pragma: no cover - defensive boundary
+        st.error(f"**{section} could not be rendered.** {exc}")
+        with st.expander("Technical details", expanded=False):
+            st.exception(exc)
 
-    latest = df.iloc[-1:]
-    X_latest = latest[feature_cols]
-    pred = float(model.predict(X_latest)[0])
-
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Predicted AQI (tomorrow)", f"{pred:.1f}")
-    col2.metric("Latest observed AQI", f"{latest['aqi'].values[0]:.1f}")
-    col3.metric("Data points", f"{len(df)}")
-
-    # AQI category
-    category, color = _aqi_category(pred)
-    st.markdown(
-        f"**AQI category:** <span style='color:{color}'>{category}</span>",
-        unsafe_allow_html=True,
-    )
-
-    # Feature values for the latest day
-    with st.expander("Latest feature values"):
-        st.dataframe(X_latest.T)
+    st.markdown(FOOTER, unsafe_allow_html=True)
 
 
-def _aqi_category(aqi: float) -> tuple[str, str]:
-    """Return (category, color) for an AQI value."""
-    if aqi <= 50:
-        return "Good", "#009966"
-    if aqi <= 100:
-        return "Moderate", "#FFBD33"
-    if aqi <= 150:
-        return "Unhealthy for Sensitive Groups", "#FF9933"
-    if aqi <= 200:
-        return "Unhealthy", "#CC0033"
-    if aqi <= 300:
-        return "Very Unhealthy", "#660099"
-    return "Hazardous", "#7E0023"
-
-
-if __name__ == "__main__":
-    main()
+main()

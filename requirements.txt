@@ -16,6 +16,9 @@ requests==2.32.3
 
 # Web application
 streamlit==1.41.0
+# Streamlit's dataframe rendering needs Arrow. Pin a release compatible with
+# the NumPy 1.26 constraint above (newer Arrow wheels require NumPy 2.x).
+pyarrow==16.1.0
 
 # Utilities
 pyyaml==6.0.1

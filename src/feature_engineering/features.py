@@ -64,6 +64,54 @@ def compute_aqi(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _feature_config(config: dict | None) -> tuple[list[int], list[int], str]:
+    """Return ``(lags, rolling_windows, target)`` from the project config."""
+    if config is None:
+        config = load_config()
+    feat_cfg = config.get("features", {})
+    lags = list(feat_cfg.get("lags", [1, 2, 3, 7]))
+    rolling_windows = list(feat_cfg.get("rolling_windows", [3, 7, 14]))
+    target = feat_cfg.get("target", "aqi_next_day")
+    return lags, rolling_windows, target
+
+
+def _add_lag_rolling_features(
+    df: pd.DataFrame,
+    cols: list[str],
+    lags: list[int],
+    rolling_windows: list[int],
+) -> pd.DataFrame:
+    """Add the exact lag/rolling features used during training.
+
+    This helper is shared by :func:`build_features` (training) and
+    :func:`build_inference_features` (dashboard), which guarantees that the
+    two code paths cannot drift apart.
+    """
+    # Lag features
+    for lag in lags:
+        for col in cols:
+            df[f"{col}_lag{lag}"] = df[col].shift(lag)
+
+    # Rolling statistics
+    for window in rolling_windows:
+        for col in cols:
+            roll = df[col].rolling(window=window, min_periods=1)
+            df[f"{col}_roll{window}_mean"] = roll.mean()
+            df[f"{col}_roll{window}_std"] = roll.std()
+            df[f"{col}_roll{window}_min"] = roll.min()
+            df[f"{col}_roll{window}_max"] = roll.max()
+
+    return df
+
+
+def _pollutant_feature_columns(df: pd.DataFrame) -> list[str]:
+    """Return pollutant columns plus AQI, in the canonical training order."""
+    cols = [c for c in POLLUTANTS if c in df.columns]
+    if AQI_COL in df.columns and AQI_COL not in cols:
+        cols.append(AQI_COL)
+    return cols
+
+
 def build_features(
     clean: pd.DataFrame | None = None,
     *,
@@ -87,13 +135,7 @@ def build_features(
     pandas.DataFrame
         Feature matrix indexed by date, including the ``aqi_next_day`` target.
     """
-    if config is None:
-        config = load_config()
-
-    feat_cfg = config.get("features", {})
-    lags = list(feat_cfg.get("lags", [1, 2, 3, 7]))
-    rolling_windows = list(feat_cfg.get("rolling_windows", [3, 7, 14]))
-    target = feat_cfg.get("target", "aqi_next_day")
+    lags, rolling_windows, target = _feature_config(config)
 
     if clean is None:
         from ..utils.io import read_csv
@@ -104,25 +146,8 @@ def build_features(
             clean = clean.set_index("date")
 
     df = compute_aqi(clean.copy())
-
-    # Pollutant columns actually present
-    cols = [c for c in POLLUTANTS if c in df.columns]
-    if AQI_COL in df.columns and AQI_COL not in cols:
-        cols.append(AQI_COL)
-
-    # Lag features
-    for lag in lags:
-        for col in cols:
-            df[f"{col}_lag{lag}"] = df[col].shift(lag)
-
-    # Rolling statistics
-    for window in rolling_windows:
-        for col in cols:
-            roll = df[col].rolling(window=window, min_periods=1)
-            df[f"{col}_roll{window}_mean"] = roll.mean()
-            df[f"{col}_roll{window}_std"] = roll.std()
-            df[f"{col}_roll{window}_min"] = roll.min()
-            df[f"{col}_roll{window}_max"] = roll.max()
+    cols = _pollutant_feature_columns(df)
+    df = _add_lag_rolling_features(df, cols, lags, rolling_windows)
 
     # Target: next-day AQI
     df[target] = df[AQI_COL].shift(-1)
@@ -131,6 +156,82 @@ def build_features(
     df = df.dropna()
 
     return df.sort_index()
+
+
+def build_inference_features(
+    clean: pd.DataFrame,
+    *,
+    config: dict | None = None,
+    origin_date: str | pd.Timestamp | None = None,
+) -> pd.DataFrame:
+    """Build leakage-safe features for one forecast origin.
+
+    Only observations up to and including ``origin_date`` are used.  The
+    next-day target is **not** created, so the origin row is preserved even
+    though its future value is unknown.  Lag and rolling features are produced
+    by the same helper used during training.
+
+    Parameters
+    ----------
+    clean:
+        Clean pollutant DataFrame.  May be indexed by date or contain a
+        ``date`` column.
+    config:
+        Optional pre-loaded project configuration.
+    origin_date:
+        Forecast origin.  When omitted, the last available row is used.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A one-row DataFrame whose index is the origin date.  It has the same
+        feature columns that were available during training, minus the target.
+    """
+    lags, rolling_windows, _ = _feature_config(config)
+
+    df = clean.copy()
+    if "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"])
+        df = df.set_index("date")
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise ValueError("The clean DataFrame must be indexed by date.")
+
+    df = df.sort_index()
+    if origin_date is not None:
+        origin_ts = pd.Timestamp(origin_date)
+        df = df.loc[:origin_ts]
+        if df.empty:
+            raise ValueError(
+                f"No observations exist on or before the requested origin "
+                f"date ({origin_ts.date()})."
+            )
+        effective_origin = df.index[-1]
+        if effective_origin != origin_ts:
+            raise ValueError(
+                f"No observation exists on the requested origin date "
+                f"({origin_ts.date()}). The closest earlier date is "
+                f"{effective_origin.date()}."
+            )
+
+    # Recompute AQI from PM2.5 so that edited pollutant inputs can never leave
+    # a stale AQI value behind.
+    df = df.drop(columns=[AQI_COL], errors="ignore")
+    df = compute_aqi(df)
+
+    cols = _pollutant_feature_columns(df)
+    df = _add_lag_rolling_features(df, cols, lags, rolling_windows)
+
+    # Lag features need enough history; rolling windows use min_periods=1.
+    df = df.dropna()
+    if df.empty:
+        raise ValueError(
+            "Not enough complete history to build inference features. "
+            "At least 8 daily observations are required for the 7-day lag."
+        )
+
+    # Only the origin row is needed for inference.  Its features use current
+    # and past observations exclusively.
+    return df.sort_index().iloc[[-1]]
 
 
 def main() -> None:
