@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aqi-predict-ml"
+name = "aerosense"
 version = "0.1.0"
-description = "AI-Based Air Quality Index Prediction and Analysis Using Machine Learning"
+description = "AeroSense — AI-based air quality index prediction and analysis using machine learning"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-authors = [{ name = "AQI Predict ML" }]
+authors = [{ name = "AeroSense" }]
 dependencies = [
     "numpy",
     "pandas",

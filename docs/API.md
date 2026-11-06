@@ -1,4 +1,4 @@
-# API Reference
+# AeroSense — API Reference
 
 All public functions accept data and an optional pre-loaded config dict, so
 they are easy to call from Python or test.

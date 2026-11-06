@@ -1,4 +1,4 @@
-# Exploratory Data Analysis (EDA) Findings — Kolkata AQI
+# AeroSense — Exploratory Data Analysis (EDA) Findings for Kolkata AQI
 
 **Dataset:** Kolkata air quality observations (CPCB historical data).
 **Time Coverage:** 2015-01-01 to 2015-01-05

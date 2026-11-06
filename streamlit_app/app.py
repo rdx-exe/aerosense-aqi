@@ -1,4 +1,4 @@
-"""Kolkata next-day AQI dashboard — single Streamlit entry point.
+"""AeroSense — Kolkata next-day AQI dashboard (single Streamlit entry point).
 
 Launch from the project root::
 
@@ -39,7 +39,7 @@ from streamlit_app.components.theme import (  # noqa: E402
     inject_css,
 )
 
-PAGE_TITLE = "Kolkata AQI Intelligence"
+PAGE_TITLE = "AeroSense · Kolkata Next-Day AQI"
 SECTIONS = {
     "Overview": overview.render,
     "Historical air quality": historical.render,
@@ -51,7 +51,7 @@ SECTIONS = {
 
 FOOTER = f"""
 <div class="aqi-footer">
-    <b>Kolkata AQI Intelligence</b> · Research dashboard for next-day AQI prediction.<br>
+    <b>AeroSense</b> · Kolkata next-day AQI research dashboard.<br>
     Historical observations come from the repository's processed dataset. Forecasts are
     model-generated estimates, not live or official AQI readings. AQI in this project is
     derived from PM2.5 using US-EPA breakpoints. The selected model has near-zero
@@ -71,7 +71,7 @@ def _configure_page() -> None:
         initial_sidebar_state="expanded",
         menu_items={
             "About": (
-                "Kolkata AQI Intelligence — an academic next-day AQI forecasting "
+                "AeroSense — an academic next-day AQI forecasting "
                 "dashboard. Historical snapshot only; no live data."
             )
         },
@@ -88,7 +88,7 @@ def _sidebar(historical, bundle) -> str:
                     <span style="font-size:1.55rem;line-height:1;">🌿</span>
                     <div>
                         <div style="font-weight:800;font-size:1.02rem;color:#14281D;">
-                            AQI Intelligence
+                            AeroSense
                         </div>
                         <div style="font-size:0.72rem;color:{PALETTE['muted']};letter-spacing:0.08em;text-transform:uppercase;">
                             Kolkata · Machine Learning

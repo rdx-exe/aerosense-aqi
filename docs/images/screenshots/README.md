@@ -1,4 +1,4 @@
-# README screenshot placeholders
+# AeroSense — README screenshot placeholders
 
 These files are intentional placeholders. The main `README.md` already points to
 each path below, so you only need to overwrite the image file with a real
@@ -36,7 +36,7 @@ with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page(viewport={"width": 1600, "height": 1000})
     page.goto("http://localhost:8501", wait_until="networkidle")
-    page.wait_for_selector("text=Kolkata Air Quality Intelligence")
+    page.wait_for_selector("text=AeroSense")
     page.wait_for_timeout(1500)
     page.screenshot(path="docs/images/screenshots/dashboard-overview.png", full_page=True)
     browser.close()

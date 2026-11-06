@@ -1,4 +1,4 @@
-# Model Card — Kolkata Next-Day AQI Predictor
+# Model Card — AeroSense Kolkata Next-Day AQI Predictor
 
 ## Model Details
 

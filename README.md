@@ -1,4 +1,6 @@
-# AI-Based Air Quality Index Prediction and Analysis Using Machine Learning
+# AeroSense
+
+**AI-Based Air Quality Index Prediction and Analysis Using Machine Learning for Kolkata**
 
 > **Next-day AQI forecasting for Kolkata, West Bengal, India** — an end-to-end,
 > reproducible machine-learning project with chronological evaluation, honest
@@ -47,6 +49,7 @@
 
 | Item | Detail |
 | :--- | :--- |
+| **Project** | **AeroSense** — AI-based air quality index prediction and analysis |
 | **Task** | Predict the **next calendar day's AQI** from current and past pollutant measurements |
 | **Location** | Kolkata, West Bengal, India |
 | **Modelling series** | 729 daily rows, **2022-01-01 → 2023-12-31**, six pollutants, no missing values |
@@ -99,15 +102,7 @@ present both facts together.
 
 ## Visual tour
 
-### Dashboard screenshots — placeholders
-
-The dashboard images below are **intentional placeholders**. Each placeholder
-contains the capture prompt and the exact target filename. Replace the PNG files
-in `docs/images/screenshots/` with your own screenshots; the README already
-points to those paths, so no Markdown changes are needed.
-
-See [docs/images/screenshots/README.md](docs/images/screenshots/README.md) for a
-capture checklist, recommended dimensions, and an optional Playwright snippet.
+### Dashboard screenshots
 
 | Section | Preview |
 | :--- | :--- |
@@ -116,7 +111,6 @@ capture checklist, recommended dimensions, and an optional Playwright snippet.
 | **AQI prediction** — validated what-if inputs, model-generated next-day forecast, gauge, origin/target dates. | ![Dashboard prediction placeholder](docs/images/screenshots/dashboard-prediction.png) |
 | **Model performance** — MAE/RMSE/R², actual vs predicted, residuals, comparison, feature importance. | ![Dashboard performance placeholder](docs/images/screenshots/dashboard-performance.png) |
 | **Environmental insights** — EDA findings, high-pollution episodes, health and environmental context. | ![Dashboard insights placeholder](docs/images/screenshots/dashboard-insights.png) |
-| **Project information** — provenance, feature contract, leakage controls, reproduction, limitations. | ![Dashboard project information placeholder](docs/images/screenshots/dashboard-project-info.png) |
 | **Mobile / responsive view** — 390 px viewport demonstration. | ![Dashboard mobile placeholder](docs/images/screenshots/dashboard-mobile.png) |
 
 > **To replace a placeholder:** overwrite the file with a PNG of the same name.
@@ -585,7 +579,7 @@ streamlit run streamlit_app/app.py --server.port 8502
 ## Repository structure
 
 ```text
-aqi-predict-ml/
+aerosense/
 ├── streamlit_app/
 │   ├── app.py                        # single dashboard entry point
 │   ├── components/
@@ -674,8 +668,8 @@ aqi-predict-ml/
 ### Setup
 
 ```bash
-git clone <repository-url> aqi-predict-ml
-cd aqi-predict-ml
+git clone <repository-url> aerosense
+cd aerosense
 
 python3 -m venv .venv
 source .venv/bin/activate          # Linux / macOS
@@ -921,7 +915,7 @@ pip install numpy==1.26.4 pyarrow==16.1.0
 Run Streamlit from the project root so relative artifact paths resolve:
 
 ```bash
-cd /path/to/aqi-predict-ml
+cd /path/to/aerosense
 streamlit run streamlit_app/app.py
 ```
 

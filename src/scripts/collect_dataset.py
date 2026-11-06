@@ -45,7 +45,7 @@ def download_and_audit():
     }
 
     with open("docs/dataset_audit.md", "w") as f:
-        f.write("# Dataset Audit Report\n\n")
+        f.write("# AeroSense — Dataset Audit Report\n\n")
         for k, v in audit.items():
             f.write(f"- **{k}**: {v}\n")
 

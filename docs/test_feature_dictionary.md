@@ -1,4 +1,4 @@
-# Feature Dictionary — AQI Forecasting
+# AeroSense — Feature Dictionary (AQI Forecasting)
 
 ## Numeric Features
 - aqi

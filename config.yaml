@@ -1,10 +1,10 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# AQI Prediction for Kolkata, West Bengal, India
+# AeroSense — AQI Prediction for Kolkata, West Bengal, India
 # Central configuration — all paths resolved relative to project root at runtime
 # ─────────────────────────────────────────────────────────────────────────────
 
 project:
-  name: "AI-Based Air Quality Index Prediction and Analysis Using Machine Learning"
+  name: "AeroSense"
   city: "Kolkata"
   state: "West Bengal"
   country: "India"

@@ -37,7 +37,7 @@ def render() -> None:
             "Project information",
             "Purpose, data provenance, model contract, reproduction steps and the "
             "limitations that bound how this dashboard should be used.",
-            eyebrow="Reference",
+            eyebrow="AeroSense · Reference",
         ),
         unsafe_allow_html=True,
     )

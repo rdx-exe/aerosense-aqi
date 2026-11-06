@@ -1,4 +1,4 @@
-# Data Dictionary — Kolkata AQI Prediction Project
+# Data Dictionary — AeroSense Kolkata AQI Prediction Project
 
 This data dictionary defines all features and attributes present in the cleaned dataset (`data/processed/cleaned_aqi.csv`).
 

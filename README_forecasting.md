@@ -1,4 +1,4 @@
-# AQI Forecasting Pipeline — Next-Day Prediction
+# AeroSense — AQI Forecasting Pipeline (Next-Day Prediction)
 
 > **Task**: Predict the **next calendar day's Air Quality Index (AQI)** for Kolkata using historical air quality measurements and engineered time-series features.
 

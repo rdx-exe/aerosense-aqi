@@ -1,4 +1,4 @@
-# Design Notes
+# AeroSense — Design Notes
 
 ## Architecture Principles
 

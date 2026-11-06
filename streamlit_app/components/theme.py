@@ -22,13 +22,13 @@ PALETTE = {
     "primary_soft": "#E8F5E9",
     "accent": "#4CAF50",
     "accent_soft": "#F1F8E9",
-    "bg": "#F6FAF6",
+    "bg": "#FFFFFF",
     "surface": "#FFFFFF",
-    "surface_alt": "#F0F6F0",
+    "surface_alt": "#F5F6F5",
     "text": "#1F2933",
     "muted": "#5F6B7A",
-    "border": "#DDE5DD",
-    "grid": "#E6EDE6",
+    "border": "#E1E5E1",
+    "grid": "#ECEFF1",
     "dark": "#102A1E",
     "warning": "#B7791F",
     "danger": "#C62828",
@@ -248,7 +248,7 @@ def inject_css() -> str:
     }}
 
     .stApp {{
-        background: radial-gradient(circle at top left, #FFFFFF 0%, {PALETTE['bg']} 42%, #EFF6EF 100%);
+        background: {PALETTE['bg']};
         color: {PALETTE['text']};
     }}
 
@@ -268,7 +268,7 @@ def inject_css() -> str:
     }}
 
     [data-testid="stSidebar"] {{
-        background: linear-gradient(180deg, #F4FAF4 0%, #EAF3EA 100%);
+        background: {PALETTE['surface']};
         border-right: 1px solid {PALETTE['border']};
     }}
 
@@ -292,11 +292,13 @@ def inject_css() -> str:
     }}
 
     .aqi-hero {{
-        background: linear-gradient(135deg, #0E2C1C 0%, #1B5E20 58%, #2E7D32 100%);
-        color: #FFFFFF;
+        background: {PALETTE['surface']};
+        color: {PALETTE['text']};
         padding: 2.0rem 2.1rem;
-        border-radius: 22px;
-        box-shadow: 0 18px 40px rgba(16, 42, 30, 0.20);
+        border: 1px solid {PALETTE['border']};
+        border-left: 6px solid {PALETTE['primary']};
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(16, 42, 30, 0.06);
         margin-bottom: 1.2rem;
         position: relative;
         overflow: hidden;
@@ -309,19 +311,19 @@ def inject_css() -> str:
         top: -90px;
         width: 320px;
         height: 320px;
-        background: radial-gradient(circle, rgba(129, 199, 132, 0.30) 0%, rgba(129, 199, 132, 0) 68%);
+        background: radial-gradient(circle, rgba(46, 125, 50, 0.06) 0%, rgba(46, 125, 50, 0) 68%);
         pointer-events: none;
     }}
 
     .aqi-hero h1 {{
-        color: #FFFFFF;
+        color: #14281D;
         margin: 0 0 0.35rem 0;
         font-size: 2.0rem;
         line-height: 1.15;
     }}
 
     .aqi-hero p {{
-        color: #D8EEDC;
+        color: {PALETTE['muted']};
         margin: 0.25rem 0 0 0;
         max-width: 850px;
         font-size: 1rem;
@@ -332,7 +334,7 @@ def inject_css() -> str:
         font-size: 0.72rem;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: #A5D6A7;
+        color: {PALETTE['primary']};
         font-weight: 700;
         margin-bottom: 0.55rem;
     }}
@@ -341,13 +343,13 @@ def inject_css() -> str:
         display: inline-block;
         padding: 0.25rem 0.6rem;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.14);
-        color: #EAF7EC;
+        background: {PALETTE['surface_alt']};
+        color: {PALETTE['primary']};
         font-size: 0.74rem;
         font-weight: 600;
         margin-right: 0.35rem;
         margin-top: 0.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        border: 1px solid {PALETTE['border']};
     }}
 
     .aqi-card {{
@@ -404,11 +406,12 @@ def inject_css() -> str:
     }}
 
     .aqi-forecast-card {{
-        background: linear-gradient(150deg, #FFFFFF 0%, #F2F9F2 100%);
-        border: 1px solid #CBE3CC;
-        border-radius: 20px;
+        background: {PALETTE['surface']};
+        border: 1px solid {PALETTE['border']};
+        border-left: 5px solid {PALETTE['primary_light']};
+        border-radius: 16px;
         padding: 1.4rem 1.5rem;
-        box-shadow: 0 10px 24px rgba(27, 94, 32, 0.08);
+        box-shadow: 0 8px 20px rgba(16, 42, 30, 0.06);
         margin-bottom: 0.8rem;
     }}
 
@@ -445,8 +448,8 @@ def inject_css() -> str:
     }}
 
     .aqi-callout.info {{
-        background: #EEF7EE;
-        border-color: #CBE3CC;
+        background: {PALETTE['surface_alt']};
+        border-color: {PALETTE['border']};
     }}
 
     .aqi-footer {{
@@ -559,7 +562,7 @@ def inject_css() -> str:
     }}
 
     .aqi-table tbody tr:hover {{
-        background: #F7FBF7;
+        background: {PALETTE['surface_alt']};
     }}
 
     .aqi-table td.num, .aqi-table th.num {{

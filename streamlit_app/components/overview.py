@@ -30,9 +30,9 @@ def render() -> None:
 
     st.markdown(
         hero(
-            "Kolkata Air Quality Intelligence",
-            "A historical air-quality explorer and a leakage-safe next-day AQI "
-            "forecast, built on the project's validation-selected machine-learning model.",
+            "AeroSense",
+            "Kolkata air-quality intelligence — a historical explorer and a leakage-safe "
+            "next-day AQI forecast, built on the project's validation-selected machine-learning model.",
             badges=[
                 "Next-day AQI",
                 "Kolkata, West Bengal",

@@ -5,7 +5,7 @@
   "forecast_horizon": "next_day",
   "config": {
     "project": {
-      "name": "AI-Based Air Quality Index Prediction and Analysis Using Machine Learning",
+      "name": "AeroSense",
       "city": "Kolkata",
       "state": "West Bengal",
       "country": "India",

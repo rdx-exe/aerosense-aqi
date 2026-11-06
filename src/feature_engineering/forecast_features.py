@@ -171,7 +171,7 @@ def _save_feature_dictionary(feature_dict: dict, path: str | Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(path, "w") as f:
-        f.write("# Feature Dictionary — AQI Forecasting\n\n")
+        f.write("# AeroSense — Feature Dictionary (AQI Forecasting)\n\n")
         f.write("## Numeric Features\n")
         for feat in feature_dict["numeric_features"]:
             f.write(f"- {feat}\n")

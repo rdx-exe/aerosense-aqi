@@ -1,8 +1,8 @@
-# Dataset Sources and Documentation
+# AeroSense — Dataset Sources and Documentation
 
 ## Overview
 
-This document records the data sources, provenance, licensing conditions, and audit results for the Kolkata Air Quality Index (AQI) prediction project.
+This document records the data sources, provenance, licensing conditions, and audit results for the AeroSense Kolkata Air Quality Index (AQI) prediction project.
 
 ## Primary Dataset Source
 

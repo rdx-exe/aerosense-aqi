@@ -1,5 +1,5 @@
 {
-  "evaluation_timestamp": "2026-11-06T16:12:26.621010",
+  "evaluation_timestamp": "2026-11-06T16:32:14.428304",
   "model_name": "random_forest",
   "model_file": "models/random_forest/model.pkl",
   "model_sha256": "9a7c60bf1bf5aa7f2c7581e64bc5cdceef4412575faf8edf442ec9a81447f3a1",
@@ -140,11 +140,11 @@
   "top_fraction_threshold": 206.35177910628016,
   "metrics": {
     "n": 109,
-    "mae": 18.761852678552383,
-    "rmse": 25.30262755798035,
-    "r2": 0.011246839750703286,
-    "mean_residual": 0.3216672541952705,
-    "median_residual": 1.154285715856389,
+    "mae": 18.761852678552376,
+    "rmse": 25.302627557980344,
+    "r2": 0.011246839750703619,
+    "mean_residual": 0.321667254195264,
+    "median_residual": 1.1542857158564175,
     "max_abs_error": 94.11458924213233,
     "p90_abs_error": 36.57625764569254
   },
@@ -171,9 +171,9 @@
     "predicted_max_aqi": 187.0932764510406,
     "baseline_max_aqi": 213.80177195670612,
     "predicted_max_error": -26.708495505665525,
-    "mean_residual_extreme": 34.14877030126231,
-    "mean_residual_non_extreme": -4.663379510635662,
-    "mean_abs_error_extreme": 34.14877030126231
+    "mean_residual_extreme": 34.148770301262296,
+    "mean_residual_non_extreme": -4.663379510635667,
+    "mean_abs_error_extreme": 34.148770301262296
   },
   "prediction_range_compression": {
     "actual_min": 72.59521500741272,
@@ -183,13 +183,13 @@
     "predicted_min": 147.5800576984857,
     "predicted_max": 187.0932764510406,
     "predicted_mean": 173.93835357584513,
-    "predicted_std": 7.0941422013177435,
+    "predicted_std": 7.094142201317739,
     "actual_range": 141.2065569492934,
     "predicted_range": 39.513218752554906,
     "prediction_range_ratio": 0.27982566536725284
   },
   "residual_autocorrelation_lag1": 0.1532158135731795,
-  "actual_predicted_correlation": 0.15930626936154238,
+  "actual_predicted_correlation": 0.15930626936154305,
   "feature_importance_method": "impurity-based feature importance",
   "feature_importance_available": true,
   "test_split_used_during_training": false,

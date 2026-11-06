@@ -275,7 +275,7 @@ def _save_statistical_summaries(df: pd.DataFrame) -> None:
 def _write_eda_findings(df: pd.DataFrame) -> None:
     """Generate a written summary of the analysis."""
     report_lines = []
-    report_lines.append("# Exploratory Data Analysis (EDA) Findings — Kolkata AQI")
+    report_lines.append("# AeroSense — Exploratory Data Analysis (EDA) Findings for Kolkata AQI")
     report_lines.append("")
     report_lines.append(f"**Dataset:** Kolkata air quality observations (CPCB historical data).")
     report_lines.append(f"**Time Coverage:** {df.index.min().date()} to {df.index.max().date()}")

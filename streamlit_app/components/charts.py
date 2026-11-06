@@ -139,7 +139,7 @@ def aqi_trend(df: pd.DataFrame, title: str = "Observed AQI trend") -> go.Figure:
             line=dict(color=PALETTE["primary"], width=2.1),
             marker=dict(size=4.5, color=marker_colors, line=dict(width=0)),
             fill="tozeroy",
-            fillcolor="rgba(46, 125, 50, 0.07)",
+            fillcolor="rgba(95, 107, 122, 0.05)",
             hovertemplate="%{x|%d %b %Y}<br>AQI: %{y:.1f}<extra></extra>",
         )
     )
@@ -438,7 +438,7 @@ def forecast_history(
             name="Historical observation",
             line=dict(color=PALETTE["primary"], width=2.1),
             fill="tozeroy",
-            fillcolor="rgba(46, 125, 50, 0.06)",
+            fillcolor="rgba(95, 107, 122, 0.05)",
             hovertemplate="%{x|%d %b %Y}<br>Observed AQI: %{y:.1f}<extra></extra>",
         )
     )
