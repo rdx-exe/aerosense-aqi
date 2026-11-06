@@ -1035,23 +1035,3 @@ Key limitations:
 - Thanks to the open-source maintainers whose tools make reproducible
   environmental-data experiments possible.
 
----
-
-### A note on the image placeholders
-
-The dashboard previews in this README are **self-describing placeholders** that
-include the capture prompt and target filename. They are safe to commit and
-replace later:
-
-```text
-docs/images/screenshots/dashboard-overview.png
-docs/images/screenshots/dashboard-historical.png
-docs/images/screenshots/dashboard-prediction.png
-docs/images/screenshots/dashboard-performance.png
-docs/images/screenshots/dashboard-insights.png
-docs/images/screenshots/dashboard-project-info.png
-docs/images/screenshots/dashboard-mobile.png
-```
-
-The evaluation figures under `docs/images/results/` are **real saved outputs** and
-do not need to be replaced.
