@@ -141,9 +141,14 @@ def build_features(
         from ..utils.io import read_csv
 
         clean = read_csv(clean_path or "data/processed/clean.csv")
-        if "date" in clean.columns:
-            clean["date"] = pd.to_datetime(clean["date"])
-            clean = clean.set_index("date")
+
+    # Accept either a date column or a DatetimeIndex.  Normalising here keeps
+    # the saved feature table free of a stray RangeIndex column and makes the
+    # CLI and dashboard paths produce identical schemas.
+    if "date" in clean.columns:
+        clean = clean.copy()
+        clean["date"] = pd.to_datetime(clean["date"])
+        clean = clean.set_index("date")
 
     df = compute_aqi(clean.copy())
     cols = _pollutant_feature_columns(df)

@@ -1,20 +1,38 @@
 # Data Dictionary — AeroSense Kolkata AQI Prediction Project
 
-This data dictionary defines all features and attributes present in the cleaned dataset (`data/processed/cleaned_aqi.csv`).
+This data dictionary defines the columns used by the shipped pipeline
+(`data/processed/clean.csv` → `data/processed/features.csv`).
 
 | Column Name | Data Type | Measurement Unit | Description |
 | :--- | :--- | :--- | :--- |
-| `date` | Datetime (YYYY-MM-DD) | — | Calendar date of observation (indexed continuously). |
-| `pm2.5` | Float | µg/m³ | Particulate Matter ≤ 2.5 micrometers in aerodynamic diameter (24-hour average). |
-| `pm10` | Float | µg/m³ | Particulate Matter ≤ 10 micrometers in aerodynamic diameter (24-hour average). |
-| `no2` | Float | µg/m³ | Nitrogen Dioxide concentration (24-hour average). |
-| `so2` | Float | µg/m³ | Sulfur Dioxide concentration (24-hour average). |
-| `co` | Float | mg/m³ | Carbon Monoxide concentration (8-hour average). |
-| `o3` | Float | µg/m³ | Ozone concentration (8-hour maximum/average). |
-| `aqi` | Float | Index (0–500) | Sub-index / overall Air Quality Index calculated via CPCB guidelines. |
-| `aqi_bucket` | Categorical | — | Qualitative health advisory category (Good, Satisfactory, Moderate, Poor, Very Poor, Severe). |
+| `date` | Datetime (YYYY-MM-DD) | — | Calendar date of observation. |
+| `pm25` | Float | µg/m³ | Fine particulate matter ≤ 2.5 µm (daily mean). |
+| `pm10` | Float | µg/m³ | Coarse particulate matter ≤ 10 µm (daily mean). |
+| `no2` | Float | µg/m³ | Nitrogen dioxide (daily mean). |
+| `so2` | Float | µg/m³ | Sulphur dioxide (daily mean). |
+| `co` | Float | mg/m³ | Carbon monoxide (daily mean). |
+| `o3` | Float | µg/m³ | Ground-level ozone (daily mean). |
+| `aqi` | Float | Index (0–500) | AQI derived from PM2.5 using US-EPA 2012 breakpoints. |
+| `aqi_next_day` | Float | Index (0–500) | AQI on the following calendar day (training target). |
+
+## Feature Columns
+
+`src/feature_engineering/features.py` adds 119 features:
+
+- Lags 1, 2, 3, and 7 days for the six pollutants and `aqi`.
+- Rolling mean, standard deviation, minimum, and maximum over 3, 7, and 14 days.
+- The target `aqi_next_day = aqi.shift(-1)`.
+
+Rows with incomplete lag/rolling history or a missing next-day target are
+dropped, producing 1,033 usable rows from the 1,041-row clean series.
 
 ## Data Integrity Rules
-- **Missing Values**: Handled via causal forward-fill (limit = 3 days) to avoid data leakage from future observations.
-- **Negative Values**: Flagged as invalid/sensor errors during auditing and replaced with `NaN` prior to imputation.
-- **Outliers**: Extreme pollution spikes (e.g. Diwali celebrations or inversion layers) are **preserved** as legitimate meteorological/anthropogenic phenomena.
+
+- **Missing values**: the raw download keeps only complete 24-hour days, so the
+  shipped clean series has no gaps.
+- **Outliers**: real pollution spikes are preserved; the optional IQR clipping
+  configured in `config.yaml` is applied during preprocessing.
+- **Leakage**: all lags and rolling statistics use current and past values only;
+  the target is the single forward shift.
+- **AQI derivation**: `aqi` is recomputed from PM2.5 in both training and
+  inference code paths.

@@ -51,7 +51,7 @@ training:
   models:
     - "random_forest"
     - "gradient_boosting"
-    - "xgboost"
+    - "extra_trees"
     - "linear_regression"
     - "svr"
 

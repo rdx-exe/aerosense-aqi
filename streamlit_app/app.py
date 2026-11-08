@@ -54,9 +54,9 @@ FOOTER = f"""
     <b>AeroSense</b> · Kolkata next-day AQI research dashboard.<br>
     Historical observations come from the repository's processed dataset. Forecasts are
     model-generated estimates, not live or official AQI readings. AQI in this project is
-    derived from PM2.5 using US-EPA breakpoints. The selected model has near-zero
-    explanatory power on the held-out test window and should not be used for health or
-    policy decisions.<br>
+    derived from PM2.5 using US-EPA breakpoints. The selected model has a modest
+    edge over a persistence baseline on the held-out test window and should not be
+    used for health or policy decisions.<br>
     <span style="color:{PALETTE['muted']};">Launch:
     <code>streamlit run streamlit_app/app.py</code></span>
 </div>

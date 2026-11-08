@@ -166,11 +166,16 @@ def test_inference_features_match_training_features(
     clean: pd.DataFrame, bundle: data_service.ModelBundle
 ) -> None:
     training = build_features(clean)
-    for origin in ["2022-06-01", "2023-09-13", "2023-12-30"]:
+    origins = [
+        clean.index[len(clean) // 4],
+        clean.index[len(clean) // 2],
+        clean.index[-2],
+    ]
+    for origin in origins:
         row = build_inference_features(clean, origin_date=origin)
         assert list(row.columns) == [c for c in training.columns if c != data_service.TARGET]
         common = [c for c in row.columns if c in training.columns]
-        difference = (row.iloc[0][common] - training.loc[pd.Timestamp(origin), common]).abs()
+        difference = (row.iloc[0][common] - training.loc[origin, common]).abs()
         assert float(difference.max()) < 1e-8
         # Every model feature is present, in any incoming order.
         assert set(bundle.feature_columns) <= set(row.columns)
@@ -178,7 +183,7 @@ def test_inference_features_match_training_features(
 
 
 def test_inference_ignores_future_observations(clean: pd.DataFrame) -> None:
-    origin = pd.Timestamp("2023-06-15")
+    origin = clean.index[len(clean) // 3]
     original = build_inference_features(clean, origin_date=origin)
 
     tampered = clean.copy()
@@ -191,14 +196,16 @@ def test_inference_ignores_future_observations(clean: pd.DataFrame) -> None:
 
 
 def test_inference_requires_enough_history(clean: pd.DataFrame) -> None:
+    before_start = clean.index.min() - pd.Timedelta(days=1)
     with pytest.raises(ValueError, match="No observations|Not enough complete history"):
-        build_inference_features(clean, origin_date="2021-12-31")
+        build_inference_features(clean, origin_date=before_start)
+    midday = clean.index[len(clean) // 2] + pd.Timedelta(hours=12)
     with pytest.raises(ValueError, match="No observation exists"):
-        build_inference_features(clean, origin_date="2023-07-15 12:00:00")
+        build_inference_features(clean, origin_date=midday)
 
 
 def test_inference_recomputes_aqi_from_edited_pm25(clean: pd.DataFrame) -> None:
-    origin = pd.Timestamp("2023-12-30")
+    origin = clean.index[-2]
     edited = clean.copy()
     edited.loc[origin, "pm25"] = 250.0
     row = build_inference_features(edited, origin_date=origin)
@@ -226,7 +233,7 @@ def test_prediction_uses_saved_model_and_feature_order(
 
 
 def test_prediction_is_deterministic(clean: pd.DataFrame) -> None:
-    origin = pd.Timestamp("2023-09-13")
+    origin = clean.index[len(clean) // 2]
     first = data_service.predict_next_day(origin)
     second = data_service.predict_next_day(origin)
     # RandomForest averages trees with a parallel reduction; the sum order can
@@ -246,7 +253,7 @@ def test_prediction_matches_saved_test_evaluation(test_predictions: pd.DataFrame
 
 
 def test_prediction_actual_next_is_reference_only(clean: pd.DataFrame) -> None:
-    origin = pd.Timestamp("2023-11-20")
+    origin = clean.index[-2]
     result = data_service.predict_next_day(origin)
     expected_actual = float(compute_aqi(clean.loc[[origin + pd.Timedelta(days=1)]])["aqi"].iloc[0])
     assert result["actual_next_aqi"] is not None
@@ -256,7 +263,7 @@ def test_prediction_actual_next_is_reference_only(clean: pd.DataFrame) -> None:
 
 
 def test_prediction_what_if_changes_forecast(clean: pd.DataFrame) -> None:
-    origin = pd.Timestamp("2023-12-30")
+    origin = clean.index[-1]
     observed = {c: float(clean.loc[origin, c]) for c in data_service.POLLUTANT_COLUMNS}
     baseline = data_service.predict_next_day(origin)
     elevated = dict(observed, pm25=300.0)
@@ -266,7 +273,7 @@ def test_prediction_what_if_changes_forecast(clean: pd.DataFrame) -> None:
     assert any("outside the training range" in warning for warning in scenario["warnings"])
 
 
-@pytest.mark.parametrize("origin", ["2024-01-15", "1900-01-01"])
+@pytest.mark.parametrize("origin", ["2030-01-15", "1900-01-01"])
 def test_prediction_rejects_unknown_origin(origin: str) -> None:
     with pytest.raises(data_service.InputValidationError):
         data_service.predict_next_day(origin)
@@ -366,7 +373,7 @@ def test_charts_handle_empty_data_gracefully() -> None:
 
 
 def test_forecast_chart_separates_forecast_from_history(historical: pd.DataFrame) -> None:
-    origin = pd.Timestamp("2023-12-30")
+    origin = historical.index[-1]
     figure = charts.forecast_history(historical, origin, origin + pd.Timedelta(days=1), 175.0)
     names = [trace.name for trace in figure.data]
     assert "Historical observation" in names
@@ -461,7 +468,7 @@ def test_app_prediction_controls() -> None:
     assert "Forecast target" in markdown
     assert "Forecast origin" in markdown
 
-    app.selectbox[0].set_value(pd.Timestamp("2023-12-30")).run()
+    app.selectbox[0].set_value(data_service.load_clean_data().index.max()).run()
     assert not app.exception
     assert not app.error
 

@@ -1,120 +1,120 @@
 feature,importance,rank,method
-so2_roll7_mean,0.11527362247808935,1,impurity-based feature importance
-co_roll7_mean,0.06672563945865445,2,impurity-based feature importance
-pm25_roll7_mean,0.04796982654730605,3,impurity-based feature importance
-pm25_roll14_mean,0.042478782053294965,4,impurity-based feature importance
-aqi_roll14_mean,0.030270358446654058,5,impurity-based feature importance
-so2_roll14_max,0.02472909773058808,6,impurity-based feature importance
-o3_lag7,0.024723348367682342,7,impurity-based feature importance
-pm10_lag2,0.024503013568259256,8,impurity-based feature importance
-aqi_roll7_mean,0.020981732045671077,9,impurity-based feature importance
-co_roll3_std,0.02089658654018179,10,impurity-based feature importance
-pm10_roll3_min,0.020328254612488644,11,impurity-based feature importance
-pm10_roll14_std,0.019689174847941294,12,impurity-based feature importance
-pm10_roll3_mean,0.018719556037704522,13,impurity-based feature importance
-no2_lag3,0.01690640955460392,14,impurity-based feature importance
-pm25_roll3_mean,0.016054185969488922,15,impurity-based feature importance
-no2_roll14_mean,0.011614611376114196,16,impurity-based feature importance
-aqi_roll7_max,0.009897444299325854,17,impurity-based feature importance
-pm10_lag3,0.009789822531377914,18,impurity-based feature importance
-so2_lag2,0.009673902926449719,19,impurity-based feature importance
-no2_lag7,0.008934553391027302,20,impurity-based feature importance
-aqi_roll3_mean,0.008606852421318959,21,impurity-based feature importance
-o3_roll7_std,0.008516875442515377,22,impurity-based feature importance
-pm25_roll7_max,0.008395592457261791,23,impurity-based feature importance
-so2_lag7,0.008313213414006695,24,impurity-based feature importance
-so2_roll3_max,0.008233443776078557,25,impurity-based feature importance
-no2_lag2,0.00802631689934272,26,impurity-based feature importance
-so2_roll14_std,0.007914215004108629,27,impurity-based feature importance
-no2_roll3_mean,0.007686504013610048,28,impurity-based feature importance
-pm10_roll7_std,0.007665736363558527,29,impurity-based feature importance
-o3_roll14_mean,0.007599976176418984,30,impurity-based feature importance
-so2_lag1,0.007560459390796551,31,impurity-based feature importance
-so2_roll7_max,0.007520047042991281,32,impurity-based feature importance
-aqi_lag7,0.0072820520024005015,33,impurity-based feature importance
-co_roll14_mean,0.007183261649843522,34,impurity-based feature importance
-co_lag7,0.007158070306877449,35,impurity-based feature importance
-pm25_roll7_std,0.006987309056130825,36,impurity-based feature importance
-pm10_roll7_mean,0.00693953151939469,37,impurity-based feature importance
-co_lag3,0.006901326721098214,38,impurity-based feature importance
-co_lag1,0.006722639498144997,39,impurity-based feature importance
-so2_roll3_mean,0.006708206146376171,40,impurity-based feature importance
-o3_lag3,0.006655121940789687,41,impurity-based feature importance
-co_roll3_max,0.006207362014228608,42,impurity-based feature importance
-co_roll7_std,0.005935707764315887,43,impurity-based feature importance
-pm10_lag7,0.005688252997369793,44,impurity-based feature importance
-pm10_roll14_max,0.005586397463488366,45,impurity-based feature importance
-no2_roll14_std,0.005541487226636405,46,impurity-based feature importance
-so2_roll3_std,0.005290377424232529,47,impurity-based feature importance
-pm10_roll3_std,0.005284728279604682,48,impurity-based feature importance
-pm25_lag2,0.005274640900944377,49,impurity-based feature importance
-so2_roll14_mean,0.005255362652819662,50,impurity-based feature importance
-no2,0.005229969565403623,51,impurity-based feature importance
-co_roll3_mean,0.005183394520120591,52,impurity-based feature importance
-co,0.005162629471504017,53,impurity-based feature importance
-pm10_lag1,0.005069351913948393,54,impurity-based feature importance
-aqi_roll7_std,0.005006913828914213,55,impurity-based feature importance
-co_roll14_min,0.004831014978219318,56,impurity-based feature importance
-pm25_lag1,0.004793660986104527,57,impurity-based feature importance
-o3,0.004687571942281827,58,impurity-based feature importance
-no2_roll7_std,0.00468351622270221,59,impurity-based feature importance
-no2_roll3_max,0.004637869003254347,60,impurity-based feature importance
-so2,0.004620690216855556,61,impurity-based feature importance
-pm25_roll3_max,0.004527748416322781,62,impurity-based feature importance
-aqi_roll3_std,0.004479299709689526,63,impurity-based feature importance
-pm25_lag3,0.004441517014888564,64,impurity-based feature importance
-co_roll7_min,0.0044015866432127616,65,impurity-based feature importance
-pm25,0.004394188087121648,66,impurity-based feature importance
-aqi_roll14_std,0.004310939743448115,67,impurity-based feature importance
-o3_lag1,0.00430263725829869,68,impurity-based feature importance
-aqi_lag2,0.004283117030976511,69,impurity-based feature importance
-no2_roll7_min,0.004257786150161442,70,impurity-based feature importance
-o3_lag2,0.004207929448322057,71,impurity-based feature importance
-pm25_lag7,0.004176069265633664,72,impurity-based feature importance
-so2_roll7_std,0.004134386446808118,73,impurity-based feature importance
-pm10_roll14_mean,0.004085620947666042,74,impurity-based feature importance
-aqi,0.003969682822307217,75,impurity-based feature importance
-so2_roll3_min,0.003963634458346993,76,impurity-based feature importance
-pm25_roll3_std,0.0038997556602364362,77,impurity-based feature importance
-pm25_roll14_std,0.0038401327603037297,78,impurity-based feature importance
-aqi_lag3,0.003839725046981953,79,impurity-based feature importance
-no2_roll14_max,0.00379246496793256,80,impurity-based feature importance
-no2_lag1,0.003728765604097742,81,impurity-based feature importance
-so2_lag3,0.0036916928354305306,82,impurity-based feature importance
-pm10,0.0036794886834976962,83,impurity-based feature importance
-co_roll14_std,0.003603806350910763,84,impurity-based feature importance
-pm25_roll7_min,0.0035562564985047234,85,impurity-based feature importance
-aqi_lag1,0.003519499890209416,86,impurity-based feature importance
-o3_roll14_std,0.003501638123866944,87,impurity-based feature importance
-co_lag2,0.003417964644344041,88,impurity-based feature importance
-pm25_roll14_max,0.0034042265931166814,89,impurity-based feature importance
-pm10_roll7_min,0.003187453659624429,90,impurity-based feature importance
-no2_roll3_min,0.003182490434139651,91,impurity-based feature importance
-co_roll3_min,0.003071753388518319,92,impurity-based feature importance
-aqi_roll3_min,0.002844142181432839,93,impurity-based feature importance
-o3_roll7_max,0.002801465203457238,94,impurity-based feature importance
-pm10_roll7_max,0.00279281262759574,95,impurity-based feature importance
-o3_roll7_mean,0.0027180804734226074,96,impurity-based feature importance
-pm10_roll3_max,0.0026827403831713695,97,impurity-based feature importance
-o3_roll3_std,0.0026178978413843716,98,impurity-based feature importance
-aqi_roll3_max,0.002595640802285461,99,impurity-based feature importance
-o3_roll3_mean,0.002517661568200257,100,impurity-based feature importance
-no2_roll3_std,0.002438702730258603,101,impurity-based feature importance
-so2_roll14_min,0.002409023798732167,102,impurity-based feature importance
-no2_roll7_mean,0.0024058354329129943,103,impurity-based feature importance
-o3_roll3_max,0.0023521750833171914,104,impurity-based feature importance
-no2_roll14_min,0.0023194056362690224,105,impurity-based feature importance
-aqi_roll14_min,0.0022595654649135806,106,impurity-based feature importance
-co_roll7_max,0.0022232657150295667,107,impurity-based feature importance
-co_roll14_max,0.0021783490230939174,108,impurity-based feature importance
-aqi_roll14_max,0.002074675226219429,109,impurity-based feature importance
-o3_roll3_min,0.0018939548603442607,110,impurity-based feature importance
-aqi_roll7_min,0.0018909202630338668,111,impurity-based feature importance
-so2_roll7_min,0.0016979895605998112,112,impurity-based feature importance
-no2_roll7_max,0.0015182988064547061,113,impurity-based feature importance
-o3_roll7_min,0.0015049666917300512,114,impurity-based feature importance
-pm25_roll14_min,0.0014467281823893404,115,impurity-based feature importance
-pm25_roll3_min,0.0014395190653648082,116,impurity-based feature importance
-pm10_roll14_min,0.0011288728856270879,117,impurity-based feature importance
-o3_roll14_max,0.0009320083917143812,118,impurity-based feature importance
-o3_roll14_min,0.000754470117208887,119,impurity-based feature importance
+aqi,19.453738242783384,1,permutation importance on validation set (negative MAE)
+no2_lag1,4.159252461595257,2,permutation importance on validation set (negative MAE)
+no2,4.1284944420545155,3,permutation importance on validation set (negative MAE)
+no2_roll14_mean,2.7493427938240798,4,permutation importance on validation set (negative MAE)
+aqi_roll3_min,2.141437981092346,5,permutation importance on validation set (negative MAE)
+pm10,1.8387865846196951,6,permutation importance on validation set (negative MAE)
+pm25,1.8296809094924,7,permutation importance on validation set (negative MAE)
+no2_roll14_max,1.4365563992087065,8,permutation importance on validation set (negative MAE)
+co,1.0926182127589592,9,permutation importance on validation set (negative MAE)
+o3,0.8000730764849919,10,permutation importance on validation set (negative MAE)
+pm25_roll3_max,0.7479756419078502,11,permutation importance on validation set (negative MAE)
+pm25_roll14_std,0.20361025599703453,12,permutation importance on validation set (negative MAE)
+pm10_roll14_std,0.04711727320297143,13,permutation importance on validation set (negative MAE)
+pm25_lag1,0.0,14,permutation importance on validation set (negative MAE)
+pm10_lag1,0.0,15,permutation importance on validation set (negative MAE)
+so2_lag1,0.0,16,permutation importance on validation set (negative MAE)
+o3_lag1,0.0,17,permutation importance on validation set (negative MAE)
+co_lag1,0.0,18,permutation importance on validation set (negative MAE)
+aqi_lag1,0.0,19,permutation importance on validation set (negative MAE)
+pm25_lag2,0.0,20,permutation importance on validation set (negative MAE)
+pm10_lag2,0.0,21,permutation importance on validation set (negative MAE)
+no2_lag2,0.0,22,permutation importance on validation set (negative MAE)
+so2_lag2,0.0,23,permutation importance on validation set (negative MAE)
+o3_lag2,0.0,24,permutation importance on validation set (negative MAE)
+co_lag2,0.0,25,permutation importance on validation set (negative MAE)
+aqi_lag2,0.0,26,permutation importance on validation set (negative MAE)
+pm25_lag3,0.0,27,permutation importance on validation set (negative MAE)
+pm10_lag3,0.0,28,permutation importance on validation set (negative MAE)
+no2_lag3,0.0,29,permutation importance on validation set (negative MAE)
+so2_lag3,0.0,30,permutation importance on validation set (negative MAE)
+o3_lag3,0.0,31,permutation importance on validation set (negative MAE)
+co_lag3,0.0,32,permutation importance on validation set (negative MAE)
+aqi_lag3,0.0,33,permutation importance on validation set (negative MAE)
+pm25_lag7,0.0,34,permutation importance on validation set (negative MAE)
+pm10_lag7,0.0,35,permutation importance on validation set (negative MAE)
+no2_lag7,0.0,36,permutation importance on validation set (negative MAE)
+so2_lag7,0.0,37,permutation importance on validation set (negative MAE)
+o3_lag7,0.0,38,permutation importance on validation set (negative MAE)
+co_lag7,0.0,39,permutation importance on validation set (negative MAE)
+aqi_lag7,0.0,40,permutation importance on validation set (negative MAE)
+pm25_roll3_std,0.0,41,permutation importance on validation set (negative MAE)
+pm10_roll3_std,0.0,42,permutation importance on validation set (negative MAE)
+pm10_roll3_min,0.0,43,permutation importance on validation set (negative MAE)
+pm10_roll3_max,0.0,44,permutation importance on validation set (negative MAE)
+no2_roll3_mean,0.0,45,permutation importance on validation set (negative MAE)
+no2_roll3_std,0.0,46,permutation importance on validation set (negative MAE)
+no2_roll3_min,0.0,47,permutation importance on validation set (negative MAE)
+no2_roll3_max,0.0,48,permutation importance on validation set (negative MAE)
+so2_roll3_mean,0.0,49,permutation importance on validation set (negative MAE)
+so2_roll3_std,0.0,50,permutation importance on validation set (negative MAE)
+so2_roll3_min,0.0,51,permutation importance on validation set (negative MAE)
+so2_roll3_max,0.0,52,permutation importance on validation set (negative MAE)
+o3_roll3_mean,0.0,53,permutation importance on validation set (negative MAE)
+o3_roll3_std,0.0,54,permutation importance on validation set (negative MAE)
+o3_roll3_min,0.0,55,permutation importance on validation set (negative MAE)
+o3_roll3_max,0.0,56,permutation importance on validation set (negative MAE)
+co_roll3_mean,0.0,57,permutation importance on validation set (negative MAE)
+co_roll3_std,0.0,58,permutation importance on validation set (negative MAE)
+co_roll3_min,0.0,59,permutation importance on validation set (negative MAE)
+co_roll3_max,0.0,60,permutation importance on validation set (negative MAE)
+aqi_roll3_std,0.0,61,permutation importance on validation set (negative MAE)
+pm25_roll7_mean,0.0,62,permutation importance on validation set (negative MAE)
+pm25_roll7_std,0.0,63,permutation importance on validation set (negative MAE)
+pm25_roll7_min,0.0,64,permutation importance on validation set (negative MAE)
+pm25_roll7_max,0.0,65,permutation importance on validation set (negative MAE)
+pm10_roll7_mean,0.0,66,permutation importance on validation set (negative MAE)
+pm10_roll7_std,0.0,67,permutation importance on validation set (negative MAE)
+pm10_roll7_min,0.0,68,permutation importance on validation set (negative MAE)
+pm10_roll7_max,0.0,69,permutation importance on validation set (negative MAE)
+no2_roll7_mean,0.0,70,permutation importance on validation set (negative MAE)
+no2_roll7_std,0.0,71,permutation importance on validation set (negative MAE)
+no2_roll7_min,0.0,72,permutation importance on validation set (negative MAE)
+no2_roll7_max,0.0,73,permutation importance on validation set (negative MAE)
+so2_roll7_mean,0.0,74,permutation importance on validation set (negative MAE)
+so2_roll7_std,0.0,75,permutation importance on validation set (negative MAE)
+so2_roll7_min,0.0,76,permutation importance on validation set (negative MAE)
+so2_roll7_max,0.0,77,permutation importance on validation set (negative MAE)
+o3_roll7_mean,0.0,78,permutation importance on validation set (negative MAE)
+o3_roll7_std,0.0,79,permutation importance on validation set (negative MAE)
+o3_roll7_min,0.0,80,permutation importance on validation set (negative MAE)
+o3_roll7_max,0.0,81,permutation importance on validation set (negative MAE)
+co_roll7_mean,0.0,82,permutation importance on validation set (negative MAE)
+co_roll7_std,0.0,83,permutation importance on validation set (negative MAE)
+co_roll7_min,0.0,84,permutation importance on validation set (negative MAE)
+co_roll7_max,0.0,85,permutation importance on validation set (negative MAE)
+aqi_roll7_mean,0.0,86,permutation importance on validation set (negative MAE)
+aqi_roll7_std,0.0,87,permutation importance on validation set (negative MAE)
+aqi_roll7_min,0.0,88,permutation importance on validation set (negative MAE)
+aqi_roll7_max,0.0,89,permutation importance on validation set (negative MAE)
+pm25_roll14_mean,0.0,90,permutation importance on validation set (negative MAE)
+pm25_roll14_min,0.0,91,permutation importance on validation set (negative MAE)
+pm25_roll14_max,0.0,92,permutation importance on validation set (negative MAE)
+pm10_roll14_mean,0.0,93,permutation importance on validation set (negative MAE)
+pm10_roll14_min,0.0,94,permutation importance on validation set (negative MAE)
+pm10_roll14_max,0.0,95,permutation importance on validation set (negative MAE)
+no2_roll14_min,0.0,96,permutation importance on validation set (negative MAE)
+so2_roll14_mean,0.0,97,permutation importance on validation set (negative MAE)
+so2_roll14_std,0.0,98,permutation importance on validation set (negative MAE)
+so2_roll14_min,0.0,99,permutation importance on validation set (negative MAE)
+so2_roll14_max,0.0,100,permutation importance on validation set (negative MAE)
+o3_roll14_mean,0.0,101,permutation importance on validation set (negative MAE)
+o3_roll14_std,0.0,102,permutation importance on validation set (negative MAE)
+o3_roll14_min,0.0,103,permutation importance on validation set (negative MAE)
+o3_roll14_max,0.0,104,permutation importance on validation set (negative MAE)
+co_roll14_mean,0.0,105,permutation importance on validation set (negative MAE)
+co_roll14_std,0.0,106,permutation importance on validation set (negative MAE)
+co_roll14_min,0.0,107,permutation importance on validation set (negative MAE)
+co_roll14_max,0.0,108,permutation importance on validation set (negative MAE)
+aqi_roll14_mean,0.0,109,permutation importance on validation set (negative MAE)
+aqi_roll14_std,0.0,110,permutation importance on validation set (negative MAE)
+aqi_roll14_min,0.0,111,permutation importance on validation set (negative MAE)
+aqi_roll14_max,0.0,112,permutation importance on validation set (negative MAE)
+no2_roll14_std,-0.003872912390213301,113,permutation importance on validation set (negative MAE)
+pm25_roll3_mean,-0.045661760301299384,114,permutation importance on validation set (negative MAE)
+pm10_roll3_mean,-0.07396129664937093,115,permutation importance on validation set (negative MAE)
+so2,-0.09385265825369515,116,permutation importance on validation set (negative MAE)
+pm25_roll3_min,-0.11116709790548995,117,permutation importance on validation set (negative MAE)
+aqi_roll3_mean,-0.12316237742522773,118,permutation importance on validation set (negative MAE)
+aqi_roll3_max,-0.12757094664715715,119,permutation importance on validation set (negative MAE)

@@ -6,14 +6,14 @@ Section 1; no metric is hand-written or estimated.
 
 ## 1. Test dataset and evaluation integrity
 
-- **Test date range:** **2023-09-13 to 2023-12-30**
-- **Test rows:** 109
+- **Test date range:** **2026-06-03 to 2026-11-05**
+- **Test rows:** 156
 - **Target:** `aqi_next_day` (AQI for the next calendar day)
-- **Model evaluated:** `random_forest`
+- **Model evaluated:** `linear_regression`
 - **Model-selection record:** `models/best_model.json`
 - **Test split file:** `data/processed/splits/test.csv`
-- **Test split SHA-256:** `3cca7c9187986477848a8fa5a5221f24cfaa53ba2b21a2e10cfb3c370ad29ef4`
-- **Model file SHA-256:** `9a7c60bf1bf5aa7f2c7581e64bc5cdceef4412575faf8edf442ec9a81447f3a1`
+- **Test split SHA-256:** `fac6c5067b6ebce9fdccf25d51e44cfae50c7507877423f66fe2367b0ab8cb7b`
+- **Model file SHA-256:** `27920a0f32849ecd69451c97bc9556431580850718daddeb2566171e2f297c73`
 - **Selection metric:** validation_rmse
 - **Was the test split used for training or selection?** No
 
@@ -31,26 +31,27 @@ its feature contract were fixed before this test evaluation.
 
 | Split | Target mean | Target std | Target min | Target max |
 | :--- | :---: | :---: | :---: | :---: |
-| train | 168.61 | 18.11 | 72.60 | 213.80 |
-| validation | 165.40 | 20.94 | 72.60 | 198.37 |
-| test | 174.26 | 25.56 | 72.60 | 213.80 |
+| train | 118.76 | 50.92 | 28.49 | 216.78 |
+| validation | 133.11 | 47.16 | 52.59 | 216.78 |
+| test | 99.89 | 44.37 | 22.92 | 186.51 |
 
 ## 2. Model selection used only the validation split
 
 | Candidate | Validation MAE | Validation RMSE | Validation R² |
 | :--- | :---: | :---: | :---: |
-| linear_regression | 19.28 | 25.16 | -0.457 |
-| random_forest | 14.90 | 21.51 | -0.065 |
-| gradient_boosting | 16.20 | 22.76 | -0.192 |
-| svr | 17.57 | 23.87 | -0.311 |
+| linear_regression | 13.17 | 17.58 | 0.860 |
+| random_forest | 14.66 | 19.16 | 0.834 |
+| extra_trees | 14.34 | 18.78 | 0.840 |
+| gradient_boosting | 14.19 | 18.86 | 0.839 |
+| svr | 14.59 | 19.35 | 0.831 |
 
-The selected model is **`random_forest`**. Its validation metrics were:
+The selected model is **`linear_regression`**. Its validation metrics were:
 
-- MAE: **14.90**
-- RMSE: **21.51**
-- R²: **-0.065**
+- MAE: **13.17**
+- RMSE: **17.58**
+- R²: **0.860**
 - Validation RMSE improvement over the persistence baseline:
-  **20.47%**
+  **8.42%**
 
 ## 3. Test-set performance versus the persistence baseline
 
@@ -59,14 +60,14 @@ The persistence baseline predicts tomorrow's AQI as today's observed AQI
 
 | Model | MAE | RMSE | R² | Mean residual (actual−pred) | Max abs error | RMSE improvement % |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| random_forest | 18.76 | 25.30 | 0.011 | 0.32 | 94.11 | 21.08 |
-| persistence (tomorrow = today's AQI) | 23.76 | 32.06 | -0.588 | -0.10 | 116.59 | — |
+| linear_regression | 16.70 | 21.08 | 0.773 | -1.15 | 65.06 | 4.03 |
+| persistence (tomorrow = today's AQI) | 15.96 | 21.97 | 0.753 | 0.44 | 79.08 | — |
 
 **Interpretation of the metrics**
 
 - **MAE (Mean Absolute Error):** average absolute prediction error in AQI
-  units. The observed test MAE is **18.76**, meaning the
-  model is typically about 18.76 AQI points away from the
+  units. The observed test MAE is **16.70**, meaning the
+  model is typically about 16.70 AQI points away from the
   observed value.
 - **RMSE (Root Mean Squared Error):** square root of the mean squared error.
   It penalises large misses more heavily than MAE, so a large RMSE relative to
@@ -78,9 +79,9 @@ The persistence baseline predicts tomorrow's AQI as today's observed AQI
 - **Mean residual (actual − predicted):** positive values mean the model
   **under-predicts** on average; negative values mean it **over-predicts**.
 
-The selected model's test RMSE is **25.30** versus
-**32.06** for persistence, a **21.08%**
-RMSE reduction. The MAE change is **21.03%** (positive means
+The selected model's test RMSE is **21.08** versus
+**21.97** for persistence, a **4.03%**
+RMSE reduction. The MAE change is **-4.64%** (positive means
 the model is better). These two facts are reported together deliberately: a
 model can reduce average error while still explaining very little variance.
 
@@ -102,14 +103,14 @@ The following figures are saved in `results/visualizations/evaluation`:
 
 Residual diagnostics:
 
-- **Mean residual:** 0.32 AQI points
+- **Mean residual:** -1.15 AQI points
   (positive = under-prediction).
-- **Median residual:** 1.15 AQI points.
-- **Residual autocorrelation at lag 1:** 0.153.
+- **Median residual:** -1.12 AQI points.
+- **Residual autocorrelation at lag 1:** 0.346.
   Values close to zero suggest little remaining day-to-day structure; large
   positive values would indicate the model is systematically lagging the
   series.
-- **Correlation between actual and predicted AQI:** 0.159.
+- **Correlation between actual and predicted AQI:** 0.885.
 
 ### Prediction range compression
 
@@ -118,13 +119,13 @@ distribution. The test-set ranges make this visible:
 
 | Quantity | Actual AQI | Model prediction |
 | :--- | :---: | :---: |
-| Minimum | 72.60 | 147.58 |
-| Maximum | 213.80 | 187.09 |
-| Range (max − min) | 141.21 | 39.51 |
-| Mean | 174.26 | 173.94 |
-| Standard deviation | 25.56 | 7.09 |
+| Minimum | 22.92 | 44.30 |
+| Maximum | 186.51 | 172.32 |
+| Range (max − min) | 163.59 | 128.02 |
+| Mean | 99.89 | 101.05 |
+| Standard deviation | 44.37 | 35.00 |
 
-The predicted range is **0.28×**
+The predicted range is **0.78×**
 the actual range. This is a clear regression-to-the-mean pattern: the model
 avoids extreme predictions. It therefore tends to **over-predict very clean
 days** and **under-predict pollution peaks**. This behaviour is a property of
@@ -135,16 +136,16 @@ values are inherently unpredictable.
 
 | Date | Actual AQI | Predicted AQI | Residual (actual−pred) | Absolute error |
 | :--- | :---: | :---: | :---: | :---: |
-| 2023-12-03 | 72.60 | 166.71 | -94.11 | 94.11 |
-| 2023-11-20 | 88.40 | 180.43 | -92.03 | 92.03 |
-| 2023-12-09 | 93.35 | 176.78 | -83.43 | 83.43 |
-| 2023-12-04 | 111.59 | 168.43 | -56.84 | 56.84 |
-| 2023-09-24 | 118.79 | 167.15 | -48.36 | 48.36 |
-| 2023-10-28 | 213.80 | 168.92 | 44.88 | 44.88 |
-| 2023-10-20 | 211.20 | 167.40 | 43.80 | 43.80 |
-| 2023-11-01 | 137.71 | 181.44 | -43.73 | 43.73 |
-| 2023-09-19 | 207.83 | 165.48 | 42.35 | 42.35 |
-| 2023-10-11 | 211.65 | 172.34 | 39.31 | 39.31 |
+| 2026-09-19 | 78.50 | 143.56 | -65.06 | 65.06 |
+| 2026-09-27 | 153.61 | 96.20 | 57.41 | 57.41 |
+| 2026-09-09 | 69.52 | 125.43 | -55.90 | 55.90 |
+| 2026-11-01 | 155.06 | 105.20 | 49.86 | 49.86 |
+| 2026-10-28 | 51.00 | 99.48 | -48.48 | 48.48 |
+| 2026-08-27 | 140.65 | 92.68 | 47.97 | 47.97 |
+| 2026-09-17 | 145.73 | 99.03 | 46.70 | 46.70 |
+| 2026-06-10 | 156.27 | 114.49 | 41.78 | 41.78 |
+| 2026-07-10 | 125.44 | 85.03 | 40.40 | 40.40 |
+| 2026-07-25 | 42.36 | 82.15 | -39.79 | 39.79 |
 
 These individual errors matter because the public-health cost of a missed
 extreme event is not proportional to the average error.
@@ -153,12 +154,12 @@ extreme event is not proportional to the average error.
 
 | AQI range | n | Model MAE | Model RMSE | Model R² | Mean residual (actual−pred) | Baseline MAE | MAE improvement % |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Moderate (51-100) | 3 | 89.86 | 89.98 | -102.345 | -89.86 | 89.08 | -0.87 |
-| Unhealthy for Sensitive Groups (101-150) | 6 | 39.99 | 41.39 | -10.904 | -39.99 | 50.83 | 21.33 |
-| Unhealthy (151-200) | 86 | 12.30 | 14.55 | -0.154 | 0.77 | 19.02 | 35.35 |
-| Very Unhealthy (201-300) | 14 | 34.15 | 34.85 | -92.409 | 34.15 | 27.28 | -25.17 |
+| Good (0-50) | 20 | 20.93 | 23.03 | -9.026 | -20.93 | 11.67 | -79.33 |
+| Moderate (51-100) | 70 | 14.13 | 19.34 | -0.898 | -8.12 | 16.74 | 15.58 |
+| Unhealthy for Sensitive Groups (101-150) | 29 | 20.92 | 23.56 | -2.193 | 7.99 | 22.41 | 6.65 |
+| Unhealthy (151-200) | 37 | 15.96 | 21.09 | -7.045 | 15.54 | 11.75 | -35.88 |
 
-Empty categories in the test split: Good (0-50), Hazardous (301-500).
+Empty categories in the test split: Very Unhealthy (201-300), Hazardous (301-500).
 
 R² values computed inside a narrow AQI range should be treated cautiously:
 when the range is narrow, target variance is small and R² can become extreme
@@ -173,43 +174,29 @@ test days is also reported, with its empirical threshold shown below.
 
 | Subset | n | Model MAE | Model RMSE | Model R² | Mean residual (actual−pred) | Baseline MAE | Baseline RMSE | MAE improvement % |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| All test days | 109 | 18.76 | 25.30 | 0.011 | 0.32 | 23.76 | 32.06 | 21.03 |
-| AQI >= 200 (Very Unhealthy) | 14 | 34.15 | 34.85 | -92.409 | 34.15 | 27.28 | 29.74 | -25.17 |
-| Top 10% of test days (AQI >= 206.4) | 11 | 36.64 | 37.03 | -363.306 | 36.64 | 25.82 | 28.65 | -41.92 |
+| All test days | 156 | 16.70 | 21.08 | 0.773 | -1.15 | 15.96 | 21.97 | -4.64 |
+| AQI >= 200 (Very Unhealthy) | 0 | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+| Top 10% of test days (AQI >= 161.2) | 16 | 11.41 | 13.67 | -4.167 | 11.17 | 6.52 | 8.19 | -74.87 |
 
 ### Peak capture and event-level behaviour
 
-- Actual maximum AQI: **213.80**
-- Model maximum predicted AQI: **187.09**
-- Persistence maximum: **213.80**
-- Model peak error (predicted max − actual max): **-26.71**
-- Extreme days (actual AQI >= 200): **14**
+- Actual maximum AQI: **186.51**
+- Model maximum predicted AQI: **172.32**
+- Persistence maximum: **174.17**
+- Model peak error (predicted max − actual max): **-14.19**
+- Extreme days (actual AQI >= 200): **0**
 - Days predicted as extreme: **0**
-- Extreme-day recall: **0.000**
+- Extreme-day recall: **N/A**
 - Extreme-day precision: **N/A**
 - False-positive extreme days: **0**
-- False-negative extreme days: **14**
-- Mean residual on extreme days (actual − predicted): **34.15**
-- Mean absolute error on extreme days: **34.15**
-- Mean residual on non-extreme days: **-4.66**
+- False-negative extreme days: **0**
+- Mean residual on extreme days (actual − predicted): **N/A**
+- Mean absolute error on extreme days: **N/A**
+- Mean residual on non-extreme days: **-1.15**
 
 ### Consecutive extreme-event runs
 
-| Event | Start | End | Days | Max actual AQI | Max predicted AQI | Max baseline AQI | Mean residual (actual−pred) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 1 | 2023-09-19 | 2023-09-19 | 1 | 207.83 | 165.48 | 163.95 | 42.35 |
-| 2 | 2023-10-05 | 2023-10-05 | 1 | 213.80 | 180.50 | 187.71 | 33.30 |
-| 3 | 2023-10-11 | 2023-10-11 | 1 | 211.65 | 172.34 | 177.02 | 39.31 |
-| 4 | 2023-10-20 | 2023-10-20 | 1 | 211.20 | 167.40 | 178.39 | 43.80 |
-| 5 | 2023-10-28 | 2023-10-28 | 1 | 213.80 | 168.92 | 189.01 | 44.88 |
-| 6 | 2023-10-30 | 2023-10-30 | 1 | 213.80 | 177.32 | 189.16 | 36.48 |
-| 7 | 2023-11-05 | 2023-11-05 | 1 | 203.07 | 181.73 | 160.22 | 21.34 |
-| 8 | 2023-11-08 | 2023-11-08 | 1 | 205.98 | 175.86 | 177.48 | 30.12 |
-| 9 | 2023-11-13 | 2023-11-14 | 2 | 213.80 | 186.55 | 213.80 | 28.74 |
-| 10 | 2023-11-16 | 2023-11-16 | 1 | 213.80 | 181.46 | 191.84 | 32.35 |
-| 11 | 2023-11-19 | 2023-11-19 | 1 | 204.99 | 181.39 | 178.39 | 23.59 |
-| 12 | 2023-11-22 | 2023-11-22 | 1 | 211.76 | 175.64 | 167.51 | 36.12 |
-| 13 | 2023-11-24 | 2023-11-24 | 1 | 209.86 | 172.89 | 195.73 | 36.97 |
+_No consecutive extreme-event run was found._
 
 **Does the model perform poorly during extreme pollution events?** The
 numbers above answer this directly rather than assuming it. Compare the
@@ -222,11 +209,11 @@ If the extreme-day error is larger than the overall error, or if recall is
 low, the model should not be described as reliable for pollution alerts.
 
 **Observed answer for this test set:** the extreme-day MAE is
-**34.15**, which is
-**1.82×** the overall MAE of
-**18.76**; extreme-day recall is
-**0.000**; and the highest prediction is
-**26.71** AQI points below the highest
+**N/A**, which is
+**N/A×** the overall MAE of
+**16.70**; extreme-day recall is
+**N/A**; and the highest prediction is
+**14.19** AQI points below the highest
 actual value. Therefore, **yes — the model performs substantially worse
 during extreme pollution events on this test set.** The relatively good
 overall MAE is driven by the large majority of days in the 151-200 range, not
@@ -235,73 +222,73 @@ by reliable peak forecasting.
 ### Where the model struggles — evidence from this test set
 
 - **Extreme high-AQI days:** the model's MAE on days with actual AQI >= 200 is
-  **34.15**, versus
-  **18.76** overall. It predicted an extreme day
+  **N/A**, versus
+  **16.70** overall. It predicted an extreme day
   **0** times out of
-  **14** actual extreme days (recall
-  **0.000**). The mean residual on those days is
-  **34.15**, so peaks are systematically
+  **0** actual extreme days (recall
+  **N/A**). The mean residual on those days is
+  **N/A**, so peaks are systematically
   **under-predicted**. The model is also worse than persistence on this
   subset (model MAE
-  **34.15** vs
+  **N/A** vs
   baseline MAE
-  **27.28**).
+  **N/A**).
 - **Clean/low-AQI days:** the lowest actual AQI in the test set is
-  **72.60**, while the lowest model
-  prediction is **147.58**. On the
-  3 days in the
+  **22.92**, while the lowest model
+  prediction is **44.30**. On the
+  70 days in the
   Moderate range the model MAE is
-  **89.86** and
+  **14.13** and
   the mean residual is
-  **-89.86**
+  **-8.12**
   (negative = over-prediction).
 - **Overall spread:** the predicted range is only
-  **0.28×** the actual range,
+  **0.78×** the actual range,
   and the correlation between actual and predicted AQI is
-  **0.159**. This is why R² is near zero even
+  **0.885**. This is why R² is near zero even
   though MAE is much lower than the persistence baseline's.
 - **Largest single miss:** see the largest-errors table above. A handful of
   rapid transitions dominate the tail of the error distribution.
 
 ## 7. Feature importance
 
-Feature importances were extracted using **impurity-based feature importance**. The table below lists the top 10; the full table is saved to `results/metrics/feature_importance.csv`.
+Feature importances were extracted using **permutation importance on validation set (negative MAE)**. The table below lists the top 10; the full table is saved to `results/metrics/feature_importance.csv`.
 
 | Feature | Importance | Rank |
 | :--- | :---: | :---: |
-| so2_roll7_mean | 0.1153 | 1 |
-| co_roll7_mean | 0.0667 | 2 |
-| pm25_roll7_mean | 0.0480 | 3 |
-| pm25_roll14_mean | 0.0425 | 4 |
-| aqi_roll14_mean | 0.0303 | 5 |
-| so2_roll14_max | 0.0247 | 6 |
-| o3_lag7 | 0.0247 | 7 |
-| pm10_lag2 | 0.0245 | 8 |
-| aqi_roll7_mean | 0.0210 | 9 |
-| co_roll3_std | 0.0209 | 10 |
+| aqi | 19.4537 | 1 |
+| no2_lag1 | 4.1593 | 2 |
+| no2 | 4.1285 | 3 |
+| no2_roll14_mean | 2.7493 | 4 |
+| aqi_roll3_min | 2.1414 | 5 |
+| pm10 | 1.8388 | 6 |
+| pm25 | 1.8297 | 7 |
+| no2_roll14_max | 1.4366 | 8 |
+| co | 1.0926 | 9 |
+| o3 | 0.8001 | 10 |
 
 Importance is not causal. Many features are lagged or rolling versions of the same pollutants and are strongly correlated, so the ranking should be read as model behaviour rather than as a physical explanation.
 
 ## 8. Limitations and possible sources of error
 
 1. **Dataset provenance and scope.** This evaluation uses the repository's
-   processed 2-year prototyping dataset, not a live official CPCB feed. The
-   AQI target is derived from PM2.5 using US-EPA breakpoints. Results describe
-   this dataset and should not be generalised to another city, station
+   processed Open-Meteo/CAMS daily series, not a live official CPCB station
+   feed. The AQI target is derived from PM2.5 using US-EPA breakpoints. Results
+   describe this dataset and should not be generalised to another city, station
    network, or time period without retraining and re-evaluation.
 2. **Small sample size.** The test split contains
-   109 daily observations. Metrics for rare categories
+   156 daily observations. Metrics for rare categories
    (especially extreme days) have wide uncertainty. A different test window
    could change the ranking against the baseline.
 3. **Distribution shift.** The test period can have a different AQI level and
    variance from training. This is visible in the split statistics above and
    can make R² negative for both the model and persistence even when MAE is
    moderate.
-4. **Weak day-to-day predictability in this dataset.** Lag-1 AQI
-   autocorrelation is low in the processed series, so next-day AQI is close to
-   noise at daily resolution. No model can manufacture predictability that is
-   absent from the inputs; this is the most important reason for the near-zero
-   R².
+4. **Strong persistence but modest model edge.** Lag-1 AQI is highly
+   autocorrelated in this series, so the persistence baseline is hard to beat.
+   The selected model improves RMSE and R² on the test window but is slightly
+   worse than persistence on MAE; the improvement should not be read as a
+   large operational gain.
 5. **Missing physics and meteorology.** Wind speed, boundary-layer height,
    temperature, humidity, rainfall, and emission-source changes are not in the
    feature set. These are major drivers of pollution accumulation and
@@ -312,7 +299,7 @@ Importance is not causal. Many features are lagged or rolling versions of the sa
    computed from PM2.5, so AQI-derived and PM2.5-derived features are partly
    redundant.
 7. **Outliers and extreme events.** Extreme pollution episodes are rare and
-   may be under-represented in training. Tree models tend to shrink
+   may be under-represented in training. Regression models tend to shrink
    predictions toward the training distribution, which can flatten peaks.
 8. **Single chronological split.** There is no rolling-origin or
    cross-validation estimate of test uncertainty. The reported numbers are
@@ -327,7 +314,7 @@ Importance is not causal. Many features are lagged or rolling versions of the sa
 
 ## 9. Is the model suitable for an educational AQI forecasting demonstration?
 
-Suitable for demonstrating the end-to-end ML pipeline, feature engineering and honest evaluation, but **not suitable as a reliable operational forecaster**. It beats persistence on average error, yet its R² is near zero, so it explains little of the day-to-day variance in AQI. It should not be presented as a dependable warning system.
+Suitable as an educational forecasting demonstration, with the caveats below. The model beats the persistence baseline and explains a meaningful share of test-set variance.
 
 **Recommendation for the educational demo:** present the model together with
 the persistence baseline, the test-period plot, the residual diagnostics, and

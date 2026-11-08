@@ -1,0 +1,92 @@
+{
+  "protocol": "Hyperparameters tuned with expanding-window TimeSeriesSplit on the training split; candidates compared on the validation split. Test split never used.",
+  "dataset": {
+    "source": "Open-Meteo Air Quality API (CAMS/ECMWF daily means)",
+    "date_range": {
+      "train": [
+        "2024-01-08",
+        "2025-12-29"
+      ],
+      "validation": [
+        "2025-12-31",
+        "2026-06-01"
+      ],
+      "test": [
+        "2026-06-03",
+        "2026-11-05"
+      ]
+    },
+    "split_rows": {
+      "train": 722,
+      "validation": 153,
+      "test": 156
+    }
+  },
+  "selected_model": "linear_regression",
+  "selected_hyperparameters": {
+    "linear_regression": {
+      "feature_selector": "RandomForestRegressor(n_estimators=500, max_features=0.5, min_samples_leaf=3, min_samples_split=10) -> top 20 features",
+      "alpha": 10.0
+    },
+    "random_forest": {
+      "n_estimators": 500,
+      "max_depth": null,
+      "max_features": 0.5,
+      "min_samples_leaf": 3,
+      "min_samples_split": 10
+    },
+    "extra_trees": {
+      "n_estimators": 500,
+      "max_depth": 10,
+      "max_features": 1.0,
+      "min_samples_leaf": 5
+    },
+    "gradient_boosting": {
+      "n_estimators": 200,
+      "learning_rate": 0.03,
+      "max_depth": 2,
+      "min_samples_leaf": 20,
+      "subsample": 0.7,
+      "max_features": 0.3,
+      "loss": "huber"
+    },
+    "svr": {
+      "C": 10.0,
+      "gamma": "scale",
+      "epsilon": 0.1
+    }
+  },
+  "validation_metrics": {
+    "linear_regression": {
+      "mae": 13.167177161230725,
+      "rmse": 17.575877625044136,
+      "r2": 0.8601902784409841
+    },
+    "random_forest": {
+      "mae": 14.655925723420385,
+      "rmse": 19.162797331168303,
+      "r2": 0.8338037793633832
+    },
+    "extra_trees": {
+      "mae": 14.33524488415518,
+      "rmse": 18.776116663402586,
+      "r2": 0.8404433605479975
+    },
+    "gradient_boosting": {
+      "mae": 14.189283298545721,
+      "rmse": 18.856887444968688,
+      "r2": 0.8390676517845526
+    },
+    "svr": {
+      "mae": 14.59139300953028,
+      "rmse": 19.34650228400041,
+      "r2": 0.8306020116858441
+    }
+  },
+  "baseline_validation_metrics": {
+    "mae": 13.498600649086544,
+    "rmse": 19.192057698414214,
+    "r2": 0.8332958498494305
+  },
+  "validation_rmse_improvement_pct": 8.421088029052864
+}

@@ -1400,9 +1400,9 @@ by reliable peak forecasting.
 ## 8. Limitations and possible sources of error
 
 1. **Dataset provenance and scope.** This evaluation uses the repository's
-   processed 2-year prototyping dataset, not a live official CPCB feed. The
-   AQI target is derived from PM2.5 using US-EPA breakpoints. Results describe
-   this dataset and should not be generalised to another city, station
+   processed Open-Meteo/CAMS daily series, not a live official CPCB station
+   feed. The AQI target is derived from PM2.5 using US-EPA breakpoints. Results
+   describe this dataset and should not be generalised to another city, station
    network, or time period without retraining and re-evaluation.
 2. **Small sample size.** The test split contains
    {test_metrics['n']} daily observations. Metrics for rare categories
@@ -1412,11 +1412,11 @@ by reliable peak forecasting.
    variance from training. This is visible in the split statistics above and
    can make R² negative for both the model and persistence even when MAE is
    moderate.
-4. **Weak day-to-day predictability in this dataset.** Lag-1 AQI
-   autocorrelation is low in the processed series, so next-day AQI is close to
-   noise at daily resolution. No model can manufacture predictability that is
-   absent from the inputs; this is the most important reason for the near-zero
-   R².
+4. **Strong persistence but modest model edge.** Lag-1 AQI is highly
+   autocorrelated in this series, so the persistence baseline is hard to beat.
+   The selected model improves RMSE and R² on the test window but is slightly
+   worse than persistence on MAE; the improvement should not be read as a
+   large operational gain.
 5. **Missing physics and meteorology.** Wind speed, boundary-layer height,
    temperature, humidity, rainfall, and emission-source changes are not in the
    feature set. These are major drivers of pollution accumulation and
@@ -1427,7 +1427,7 @@ by reliable peak forecasting.
    computed from PM2.5, so AQI-derived and PM2.5-derived features are partly
    redundant.
 7. **Outliers and extreme events.** Extreme pollution episodes are rare and
-   may be under-represented in training. Tree models tend to shrink
+   may be under-represented in training. Regression models tend to shrink
    predictions toward the training distribution, which can flatten peaks.
 8. **Single chronological split.** There is no rolling-origin or
    cross-validation estimate of test uncertainty. The reported numbers are

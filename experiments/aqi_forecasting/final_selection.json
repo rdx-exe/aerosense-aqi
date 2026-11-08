@@ -1,38 +1,43 @@
 {
-  "model_name": "random_forest",
+  "model_name": "linear_regression",
   "selected_by": "validation_rmse",
   "selection_rule": "Lowest validation RMSE among candidates that improve the persistence baseline by more than 5%; if none do, fall back to the lowest validation RMSE.",
   "validation_metrics": {
-    "mae": 14.903813294309193,
-    "rmse": 21.510627773154848,
-    "r2": -0.06486884577387952
+    "mae": 13.167177161230725,
+    "rmse": 17.575877625044136,
+    "r2": 0.8601902784409841
   },
   "baseline_validation_metrics": {
-    "mae": 19.70754248762617,
-    "rmse": 27.048569657092404,
-    "r2": -0.6837536866956642
+    "mae": 13.498600649086544,
+    "rmse": 19.192057698414214,
+    "r2": 0.8332958498494305
   },
-  "validation_rmse_improvement_pct": 20.47406555742016,
+  "validation_rmse_improvement_pct": 8.421088029052864,
   "candidate_validation_metrics": {
     "linear_regression": {
-      "mae": 19.27637181353457,
-      "rmse": 25.16250343841837,
-      "r2": -0.4571278049383909
+      "mae": 13.167177161230725,
+      "rmse": 17.575877625044136,
+      "r2": 0.8601902784409841
     },
     "random_forest": {
-      "mae": 14.903813294309193,
-      "rmse": 21.510627773154848,
-      "r2": -0.06486884577387952
+      "mae": 14.655925723420385,
+      "rmse": 19.162797331168303,
+      "r2": 0.8338037793633832
+    },
+    "extra_trees": {
+      "mae": 14.33524488415518,
+      "rmse": 18.776116663402586,
+      "r2": 0.8404433605479975
     },
     "gradient_boosting": {
-      "mae": 16.197237240065242,
-      "rmse": 22.760497191833654,
-      "r2": -0.1922118674702058
+      "mae": 14.189283298545721,
+      "rmse": 18.856887444968688,
+      "r2": 0.8390676517845526
     },
     "svr": {
-      "mae": 17.571421105226595,
-      "rmse": 23.867176638613117,
-      "r2": -0.31096786312544156
+      "mae": 14.59139300953028,
+      "rmse": 19.34650228400041,
+      "r2": 0.8306020116858441
     }
   },
   "feature_columns": [
@@ -158,51 +163,51 @@
   ],
   "n_features": 119,
   "test_split_used_during_training": false,
-  "selected_at": "2026-11-05T14:09:03.937337",
+  "selected_at": "2026-11-08T19:21:43.522759",
   "split_info": {
     "split_rows": {
-      "train": 503,
-      "validation": 107,
-      "test": 109
+      "train": 722,
+      "validation": 153,
+      "test": 156
     },
     "date_ranges": {
       "train": [
-        "2022-01-08",
-        "2023-05-26"
+        "2024-01-08",
+        "2025-12-29"
       ],
       "validation": [
-        "2023-05-28",
-        "2023-09-11"
+        "2025-12-31",
+        "2026-06-01"
       ],
       "test": [
-        "2023-09-13",
-        "2023-12-30"
+        "2026-06-03",
+        "2026-11-05"
       ]
     },
     "target_stats": {
       "train": {
-        "target_mean": 168.61160305080594,
-        "target_std": 18.114331338631494,
-        "target_min": 72.59521500741272,
-        "target_max": 213.80177195670615,
-        "current_aqi_mean": 168.64281641488944,
-        "current_aqi_std": 18.113259881721476
+        "target_mean": 118.7557569553738,
+        "target_std": 50.919574824950075,
+        "target_min": 28.489583333333336,
+        "target_max": 216.7770833333333,
+        "current_aqi_mean": 118.72827147401111,
+        "current_aqi_std": 50.880845530174106
       },
       "validation": {
-        "target_mean": 165.3996126748314,
-        "target_std": 20.94324535945339,
-        "target_min": 72.59521500741272,
-        "target_max": 198.3736560549376,
-        "current_aqi_mean": 165.55038618121694,
-        "current_aqi_std": 21.064138780944685
+        "target_mean": 133.10774145715666,
+        "target_std": 47.15983273890125,
+        "target_min": 52.590811965811966,
+        "target_max": 216.7770833333333,
+        "current_aqi_mean": 133.74932642447695,
+        "current_aqi_std": 47.62677685560386
       },
       "test": {
-        "target_mean": 174.26002083004033,
-        "target_std": 25.56366112589452,
-        "target_min": 72.59521500741272,
-        "target_max": 213.80177195670615,
-        "current_aqi_mean": 174.35574836033416,
-        "current_aqi_std": 25.606210248956888
+        "target_mean": 99.89236922125333,
+        "target_std": 44.37226076986846,
+        "target_min": 22.916666666666668,
+        "target_max": 186.50877192982452,
+        "current_aqi_mean": 99.45561427298523,
+        "current_aqi_std": 43.846400901609506
       }
     },
     "purged_boundary_rows": 2,

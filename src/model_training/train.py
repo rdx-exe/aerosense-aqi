@@ -2,12 +2,16 @@
 
 Implements and compares:
 1. Persistence baseline
-2. Linear Regression
+2. Ridge regression on selected features
 3. Random Forest Regressor
-4. HistGradientBoostingRegressor
-5. XGBoost Regressor (if available)
+4. Extra Trees Regressor
+5. Gradient Boosting Regressor (Huber loss)
+6. Support Vector Regressor
+7. XGBoost Regressor (if available)
 
 Uses chronological splits (train/validation/test) from feature engineering.
+Hyperparameters were selected with expanding-window time-series
+cross-validation on the training split only.
 """
 
 from __future__ import annotations
@@ -18,7 +22,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
+from sklearn.ensemble import (
+    ExtraTreesRegressor,
+    GradientBoostingRegressor,
+    RandomForestRegressor,
+)
+from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
@@ -45,47 +54,90 @@ def persistence_baseline(X: pd.DataFrame, y: pd.Series) -> np.ndarray:
 
 
 def create_models(config: dict) -> dict:
-    """Create model pipeline registry."""
+    """Create model pipeline registry.
+
+    Hyperparameters were selected with expanding-window ``TimeSeriesSplit``
+    cross-validation on the training split only (see
+    ``experiments/tuning_summary.json``).  The validation split is left for
+    model selection and the test split is never touched during training.
+    """
     models = {}
 
-    # Linear Regression with scaling and imputation
+    # Linear regression on the 20 most informative features.  A random-forest
+    # importance filter removes the many collinear lag/rolling columns, which
+    # otherwise make an unregularised linear model unstable on this series.
+    feature_selector = SelectFromModel(
+        RandomForestRegressor(
+            n_estimators=500,
+            max_features=0.5,
+            min_samples_leaf=3,
+            min_samples_split=10,
+            random_state=42,
+            n_jobs=-1,
+        ),
+        threshold=-np.inf,
+        max_features=20,
+    )
     models["linear_regression"] = Pipeline([
         ("imputer", SimpleImputer(strategy="mean")),
+        ("selector", feature_selector),
         ("scaler", StandardScaler()),
-        ("regressor", Ridge(random_state=42, alpha=1.0))
+        ("regressor", Ridge(random_state=42, alpha=10.0)),
     ])
 
-    # Random Forest
+    # Random Forest (tuned)
     models["random_forest"] = RandomForestRegressor(
-        n_estimators=200,
-        max_depth=10,
+        n_estimators=500,
+        max_depth=None,
+        max_features=0.5,
+        min_samples_leaf=3,
+        min_samples_split=10,
         random_state=42,
-        n_jobs=-1
+        n_jobs=-1,
     )
 
-    # Hist Gradient Boosting
-    models["gradient_boosting"] = HistGradientBoostingRegressor(
-        max_iter=300,
-        learning_rate=0.05,
-        max_depth=8,
-        random_state=42
+    # Extra Trees (tuned)
+    models["extra_trees"] = ExtraTreesRegressor(
+        n_estimators=500,
+        max_depth=10,
+        max_features=1.0,
+        min_samples_leaf=5,
+        bootstrap=True,
+        random_state=42,
+        n_jobs=-1,
     )
 
-    # Support Vector Regression (scaled, as in the configured candidate list)
+    # Gradient Boosting with a robust Huber loss (tuned)
+    models["gradient_boosting"] = GradientBoostingRegressor(
+        n_estimators=200,
+        learning_rate=0.03,
+        max_depth=2,
+        min_samples_leaf=20,
+        subsample=0.7,
+        max_features=0.3,
+        loss="huber",
+        random_state=42,
+    )
+
+    # Support Vector Regression (scaled, tuned)
     models["svr"] = Pipeline([
         ("imputer", SimpleImputer(strategy="mean")),
         ("scaler", StandardScaler()),
-        ("regressor", SVR(C=100.0, gamma="scale", epsilon=0.1)),
+        ("regressor", SVR(C=10.0, gamma="scale", epsilon=0.1)),
     ])
 
     # XGBoost (if available)
     if XGB_AVAILABLE:
         models["xgboost"] = XGBRegressor(
-            n_estimators=200,
-            max_depth=6,
-            learning_rate=0.1,
+            n_estimators=400,
+            max_depth=3,
+            learning_rate=0.03,
+            subsample=0.8,
+            colsample_bytree=0.5,
+            min_child_weight=5,
+            reg_lambda=1.0,
             random_state=42,
-            verbosity=0
+            verbosity=0,
         )
 
     return models
@@ -349,7 +401,7 @@ def main() -> None:
     # Prepare features and target
     feature_cols = [
         c for c in train_df.columns
-        if c not in ["date", "aqi_next_day", "city", "aqi_bucket", "season"]
+        if c not in ["date", "aqi_next_day", "city", "aqi_bucket", "season", "index"]
         and not c.startswith("Unnamed")
     ]
 

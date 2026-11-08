@@ -4,10 +4,10 @@
 
 ## Project Flow
 
-1. **Data Acquisition** → Raw `city_day.csv` (CPCB historical records).
+1. **Data Acquisition** → `data/raw/kolkata_aqi_history.csv` downloaded from the keyless Open-Meteo Air Quality API (CAMS/ECMWF daily means, 2024–2026).
 2. **Data Cleaning** → `src/preprocessing/clean_data.py` produces `data/processed/cleaned_aqi.csv`.
 3. **Exploratory Data Analysis (EDA)** → `src/exploratory/eda.py` generates visualizations, statistical summaries, and `docs/eda_findings.md`.
-4. **Time‑Series Feature Engineering** → `src/feature_engineering/features.py` builds the full lag/rolling feature table from the 2-year cleaned dataset; `src/model_training/prepare_data.py` creates chronological train/validation/test splits:
+4. **Time‑Series Feature Engineering** → `src/feature_engineering/features.py` builds the full lag/rolling feature table from the cleaned 2024–2026 dataset; `src/model_training/prepare_data.py` creates chronological train/validation/test splits:
    * `data/processed/features.csv`
    * `data/processed/splits/train.csv`, `validation.csv`, `test.csv`
    * `data/processed/splits/split_info.json`
@@ -29,7 +29,7 @@ source .venv/bin/activate
 ./scripts/run_forecasting.sh
 ```
 
-> **Note:** The pipeline uses the small synthetic `kolkata_city_day.csv` for rapid prototyping. For real production, replace it with the full CPCB dataset (2015‑2020) or, for more recent data, use the OpenAQ v3 API (API key required) or official CPCB bulletins.
+> **Note:** The shipped pipeline uses `data/raw/kolkata_aqi_history.csv`, downloaded from the keyless Open-Meteo Air Quality API. Refresh it with `python -m src.scripts.download_recent_aqi --start 2024-01-01 --end 2026-11-06`. The old 5-row `kolkata_city_day.csv` fixture is retained for reference only.
 
 ## Feature Set Overview
 
@@ -44,16 +44,16 @@ source .venv/bin/activate
 
 ## Data Splits (Chronological)
 
-The full processed feature table (721 rows) is split into **train / validation / test**
+The full processed feature table (1,033 rows) is split into **train / validation / test**
 with exact temporal order preservation. One boundary row is purged between
 adjacent splits so that the last target in one split does not belong to the
 next split.
 
 | Split | Rows | Coverage |
 |-------|------|----------|
-| **Training** | 503 | 2022‑01‑08 to 2023‑05‑26 |
-| **Validation** | 107 | 2023‑05‑28 to 2023‑09‑11 |
-| **Test** | 109 | 2023‑09‑13 to 2023‑12‑30 |
+| **Training** | 722 | 2024‑01‑08 to 2025‑12‑29 |
+| **Validation** | 153 | 2025‑12‑31 to 2026‑06‑01 |
+| **Test** | 156 | 2026‑06‑03 to 2026‑11‑05 |
 
 > **Rationale**: Chronological splitting ensures realistic forecasting evaluation — models are always trained on past data to predict the future. The test split is written once and is never read by the training script.
 
@@ -77,7 +77,7 @@ The final report is `documentation/model_evaluation.md`; the metrics table is
 
 ## Limitations & Considerations
 
-- **Dataset Scope**: The current evaluation uses a 2-year processed prototyping dataset, not a live official CPCB feed. Results should not be generalised to another city or period without retraining and re-evaluation.
+- **Dataset Scope**: The current evaluation uses a modelled Open-Meteo/CAMS series, not a live official CPCB feed. Results should not be generalised to another city or period without retraining and re-evaluation.
 - **Feature Leakage Prevention**: All lag and rolling features use only past/current information; no future measurements are included.
 - **Seasonal Handling**: Seasons are derived from the calendar month (Winter = Dec‑Feb, Spring = Mar‑May, etc.).
 - **Imputation**: Missing values are forward‑filled with a limit of 3 days; outliers are preserved as legitimate events.
@@ -134,7 +134,7 @@ The final report is `documentation/model_evaluation.md`; the metrics table is
 
 - [x] Project structure created
 - [x] Dependencies installed (`requirements.txt`, `pyproject.toml`)
-- [x] Raw dataset sourced (CPCB `city_day.csv`)
+- [x] Raw dataset sourced (Open-Meteo Air Quality API → `kolkata_aqi_history.csv`)
 - [x] Data cleaning pipeline (`clean_data.py`) implemented and tested
 - [x] Exploratory analysis (`eda.py`) executed
 - [x] Time‑series feature engineering (`forecast_features.py`) completed
@@ -146,7 +146,7 @@ The final report is `documentation/model_evaluation.md`; the metrics table is
 
 ## Next Actions (Post‑Prototype)
 
-1. **Scale and validate the dataset**: Replace the 2-year prototyping series with the full CPCB historical `city_day.csv` covering 2015‑2020 and verify provenance.
+1. **Scale and validate the dataset**: Add direct CPCB station observations or an independent monitor series to cross-check the Open-Meteo/CAMS fields.
 2. **Add weather**: Integrate the Open‑Meteo daily API (no key required) for temperature, humidity, precipitation.
 3. **Expand features**: Include more lags (30‑day), rolling statistics for pollutants, and interaction terms.
 4. **Strengthen evaluation**: Add rolling-origin validation and a second chronological test window.

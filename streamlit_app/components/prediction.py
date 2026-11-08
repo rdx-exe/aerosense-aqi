@@ -231,8 +231,9 @@ def render() -> None:
 
         st.markdown(
             callout(
-                "Model caveat: near-zero test R² and compressed predictions. "
-                "Treat this as an educational estimate, not an official alert.",
+                "Model caveat: predictions are compressed toward the training mean "
+                "and can miss pollution peaks. Treat this as an educational estimate, "
+                "not an official alert.",
                 kind="warn",
             ),
             unsafe_allow_html=True,
